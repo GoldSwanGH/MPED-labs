@@ -34,7 +34,7 @@ class Model:
         if Rs is None:
             Rs = R / 10
         if M is None:
-            M = int((np.random.randint(500, 1000) / 1000) * data.N)
+            M = int((np.random.randint(500, 1000) / 100000) * data.N)
 
         outliers = np.random.randint(0, data.N, M)
 

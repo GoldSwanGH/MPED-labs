@@ -4,7 +4,7 @@ import numpy as np
 
 class MyRandom:
 
-    def __init__(self, m=2**16 + 1, a=75, c=74, seed=None):
+    def __init__(self, m=2**32, a=1664525, c=1013904223, seed=None):
         if seed is None:
             self.seed = datetime.datetime.now().microsecond
         else:
@@ -16,7 +16,7 @@ class MyRandom:
 
     def next_double(self):
         self.seed = (self.a * self.seed + self.c) % self.m
-        return float("0." + str(self.seed))
+        return self.seed / self.m
 
     def rand(self, N=1):
         if N < 1:

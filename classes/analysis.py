@@ -1,10 +1,5 @@
 import math
-
 import numpy as np
-
-import sys
-
-from classes.trend_data import TrendData
 
 
 class Analysis:
