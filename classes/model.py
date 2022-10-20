@@ -36,12 +36,16 @@ class Model:
         if M is None:
             M = int((np.random.randint(500, 1000) / 100000) * data.N)
 
+        data_copy = copy.deepcopy(data)
+
         outliers = np.random.randint(0, data.N, M)
 
         for i in range(M):
             sign = np.random.randint(0, 2)
             value = np.random.randint(R-Rs, R+Rs)
-            data.y[outliers[i]] = value * ((-1)**sign)
+            data_copy.y[outliers[i]] = value * ((-1) ** sign)
+
+        return data_copy
 
     @staticmethod
     def harm(N=1000, A0=100, f0=33, dt=0.001):

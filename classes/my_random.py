@@ -20,7 +20,7 @@ class MyRandom:
 
     def rand(self, N=1):
         if N < 1:
-            raise ValueError("N should be at least 1")
+            raise ValueError("N must be at least 1")
         elif N == 1:
             return self.next_double()
 

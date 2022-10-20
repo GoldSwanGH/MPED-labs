@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import pandas as pd
 
 
 class Analysis:
@@ -46,7 +47,6 @@ class Analysis:
         print("Среднеквадратическая ошибка: " + str(data_rms))
         print()
 
-
     @staticmethod
     def stationary(M, data):  # Task 3
         split_arr = np.split(data.y, M)
@@ -75,3 +75,53 @@ class Analysis:
         else:
             print("Процесс не стационарный")
         print()
+
+    @staticmethod
+    def hist(data, M):  # Task 6
+        s = pd.Series(data.y)
+
+        # return s.plot.kde()
+        return s.plot.hist(bins=M)
+
+    @staticmethod
+    def kde(data):  # Task 6 (extra)
+        s = pd.Series(data.y)
+
+        return s.plot.kde()
+        # return s.plot.hist(bins=M)
+
+    @staticmethod
+    def acf(data):  # Task 7.1
+
+        Rxx = []
+        mean = data.y.mean()
+
+        for L in data.x:
+            value = 0
+            for k in range(data.N - L - 1):
+                value += (data.y[k] - mean) * (data.y[k + L] - mean)
+            Rxx.append(value)
+
+        Rxx = np.array(Rxx)
+        Rxx = Rxx / data.N
+        R = Rxx / np.amax(a=Rxx)
+        return R
+
+    @staticmethod
+    def ccf(dataX, dataY):  # Task 7.2
+        if dataY.N < dataX.N:
+            raise ValueError("dataY N must be equal or more than dataX N")
+
+        Rxy = []
+        meanX = dataX.y.mean()
+        meanY = dataX.y.mean()
+
+        for L in dataX.x:
+            value = 0
+            for k in range(dataX.N - L - 1):
+                value += (dataX.y[k] - meanX) * (dataY.y[k + L] - meanY)
+            Rxy.append(value)
+
+        Rxy = np.array(Rxy)
+        Rxy = Rxy / dataX.N
+        return Rxy
