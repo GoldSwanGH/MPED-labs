@@ -121,6 +121,7 @@ while True:
             Analysis.kde(data)
             plt.show()
 
+            print("Гистограмма процесса типа " + data.__class__.__name__)
             print("Нажмите Enter для следующего графика...")
             input()
 
