@@ -12,7 +12,7 @@ class TrendData:
         self.a = a
         self.b = b
 
-        self.x = np.arange(1000)
+        self.x = np.arange(N)
 
         if data_type == DataType.LINEAR:
             self.y = -a * self.x + b

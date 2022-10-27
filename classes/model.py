@@ -54,3 +54,12 @@ class Model:
     @staticmethod
     def poly_harm(N=1000, A0=100, f0=33, A1=100, f1=33, A2=100, f2=33, dt=0.001):
         return PolyHarmData(N, A0, dt, f0)
+
+    @staticmethod
+    def add_model(data1, data2):
+        data = copy.deepcopy(data1)
+        data.y += data2.y
+
+        return data
+
+

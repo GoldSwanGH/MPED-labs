@@ -80,7 +80,6 @@ class Analysis:
     def hist(data, M):  # Task 6
         s = pd.Series(data.y)
 
-        # return s.plot.kde()
         return s.plot.hist(bins=M)
 
     @staticmethod
@@ -88,7 +87,6 @@ class Analysis:
         s = pd.Series(data.y)
 
         return s.plot.kde()
-        # return s.plot.hist(bins=M)
 
     @staticmethod
     def acf(data):  # Task 7.1

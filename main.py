@@ -1,5 +1,6 @@
 from sys import exit
 import matplotlib.pyplot as plt
+import numpy as np
 
 from classes.analysis import Analysis
 from classes.data_type import DataType
@@ -8,7 +9,7 @@ from classes.processing import Processing
 
 
 while True:
-    print("Введите номер задания (от 1 до 7) или 0 для выхода: ")
+    print("Введите номер задания (от 1 до 8) или 0 для выхода: ")
     i = int(input())
 
     if i == 1:
@@ -220,6 +221,71 @@ while True:
         plt.plot(impulsed_harm.x, impulsed_harm.y)
         plt.subplot(212)
         plt.plot(anti_spike_harm.x, anti_spike_harm.y)
+        plt.show()
+
+    elif i == 8:
+        print("Функция аддитивной модели")
+        print("...линейного тренда trend и гармонического процесса harm")
+
+        lin = Model.trend(N=1000, a=0.1, b=20, data_type=DataType.LINEAR)
+        f0 = 50
+        harm = Model.harm(N=1000, A0=5, f0=f0)
+
+        added_a = Model.add_model(lin, harm)
+        plt.plot(added_a.x, added_a.y)
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        print("...экспоненциального тренда trend и случайного шума noise")
+
+        exp = Model.trend(N=1000, a=0.05, b=10, data_type=DataType.EXPONENTIAL)
+        noise = Model.noise(N=1000, R=10)
+
+        added_b = Model.add_model(exp, noise)
+        plt.plot(added_b.x, added_b.y)
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        print("Удаление линейного тренда из первого графика")
+
+        anti_lin = Processing.anti_shift(Processing.anti_trend_linear(added_a))
+        anti_lin.y = anti_lin.y * (166.5/f0)
+        plt.plot(anti_lin.x, anti_lin.y)
+        plt.show()
+
+        # Амплитуда меняется в зависимости от частоты изначального процесса
+        # Отношение новой амплитуды к старой:
+        # 0.309, 0.308, 0.3086, 0.309 при f=50
+        # 0.1254 при f=20
+        # ~1.0 при f=166 и f=167
+        # Чтобы вернуть амплитуду, можно умножить данные на 166.5/f0
+
+        old_A = harm.A
+        new_A_1 = np.amax(anti_lin.y)
+        new_A_2 = np.amin(anti_lin.y)
+
+        print("old A = " + str(old_A) + " new A_1 = " + str(new_A_1) + " new A_2 = " + str(new_A_2))
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        print("Удаление экспоненциального тренда из второго графика")
+
+        anti_exp_1 = Processing.anti_trend_non_linear(added_b, 10)
+        anti_exp_2 = Processing.anti_trend_non_linear(added_b, 15)
+        anti_exp_3 = Processing.anti_trend_non_linear(added_b, 20)
+        plt.subplot(221)
+        plt.plot(noise.x, noise.y)
+        plt.subplot(222)
+        plt.plot(anti_exp_1.x, anti_exp_1.y)
+        plt.subplot(223)
+        plt.plot(anti_exp_2.x, anti_exp_2.y)
+        plt.subplot(224)
+        plt.plot(anti_exp_3.x, anti_exp_3.y)
         plt.show()
 
     elif i == 0:
