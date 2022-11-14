@@ -15,6 +15,6 @@ class TrendData:
         self.x = np.arange(N)
 
         if data_type == DataType.LINEAR:
-            self.y = -a * self.x + b
+            self.y = a * self.x + b
         elif data_type == DataType.EXPONENTIAL:
-            self.y = b * np.exp(-a * self.x)
+            self.y = b * np.exp(a * self.x)

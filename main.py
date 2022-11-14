@@ -110,7 +110,7 @@ while True:
     elif i == 6:
         default_noise_1 = Model.noise(N=10000, R=10)
         lin_asc = Model.trend(N=10000, a=-2, b=3, data_type=DataType.LINEAR)
-        non_lin_asc = Model.trend(N=10000, a=-0.01, b=10000, data_type=DataType.EXPONENTIAL)
+        non_lin_asc = Model.trend(N=10000, a=0.001, b=10000, data_type=DataType.EXPONENTIAL)
         harm_1 = Model.harm(N=10000, A0=100, f0=33)
 
         list = [default_noise_1, lin_asc, non_lin_asc, harm_1]
@@ -228,7 +228,7 @@ while True:
         print("...линейного тренда trend и гармонического процесса harm")
 
         lin = Model.trend(N=1000, a=0.1, b=20, data_type=DataType.LINEAR)
-        f0 = 50
+        f0 = 250
         harm = Model.harm(N=1000, A0=5, f0=f0)
 
         added_a = Model.add_model(lin, harm)
@@ -240,7 +240,7 @@ while True:
 
         print("...экспоненциального тренда trend и случайного шума noise")
 
-        exp = Model.trend(N=1000, a=0.05, b=10, data_type=DataType.EXPONENTIAL)
+        exp = Model.trend(N=1000, a=0.002, b=10, data_type=DataType.EXPONENTIAL)
         noise = Model.noise(N=1000, R=10)
 
         added_b = Model.add_model(exp, noise)
@@ -253,7 +253,7 @@ while True:
         print("Удаление линейного тренда из первого графика")
 
         anti_lin = Processing.anti_shift(Processing.anti_trend_linear(added_a))
-        anti_lin.y = anti_lin.y * (166.5/f0)
+        anti_lin.y = anti_lin.y # * (166.5/f0)
         plt.plot(anti_lin.x, anti_lin.y)
         plt.show()
 
@@ -263,7 +263,7 @@ while True:
         # 0.1254 при f=20
         # ~1.0 при f=166 и f=167
         # Чтобы вернуть амплитуду, можно умножить данные на 166.5/f0
-
+        # Update: неверно для частот > 166
         old_A = harm.A
         new_A_1 = np.amax(anti_lin.y)
         new_A_2 = np.amin(anti_lin.y)
@@ -278,14 +278,20 @@ while True:
         anti_exp_1 = Processing.anti_trend_non_linear(added_b, 10)
         anti_exp_2 = Processing.anti_trend_non_linear(added_b, 15)
         anti_exp_3 = Processing.anti_trend_non_linear(added_b, 20)
-        plt.subplot(221)
+        anti_exp_4 = Processing.anti_trend_non_linear(added_b, 25)
+        anti_exp_5 = Processing.anti_trend_non_linear(added_b, 30)
+        plt.subplot(321)
         plt.plot(noise.x, noise.y)
-        plt.subplot(222)
+        plt.subplot(322)
         plt.plot(anti_exp_1.x, anti_exp_1.y)
-        plt.subplot(223)
+        plt.subplot(323)
         plt.plot(anti_exp_2.x, anti_exp_2.y)
-        plt.subplot(224)
+        plt.subplot(324)
         plt.plot(anti_exp_3.x, anti_exp_3.y)
+        plt.subplot(325)
+        plt.plot(anti_exp_4.x, anti_exp_4.y)
+        plt.subplot(326)
+        plt.plot(anti_exp_5.x, anti_exp_5.y)
         plt.show()
 
     elif i == 0:

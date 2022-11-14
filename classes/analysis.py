@@ -1,4 +1,6 @@
 import math
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -79,6 +81,24 @@ class Analysis:
     @staticmethod
     def hist(data, M):  # Task 6
         s = pd.Series(data.y)
+
+        ymax = np.amax(data.y)
+        ymin = np.amin(data.y)
+        bin_size = (ymax - ymin) / M
+        x = []
+        bins = []
+        bin = 0
+        for i in range(M):
+            x.append(ymin + i * bin_size)
+            bins.append(0)
+            # lmin = ymin + i * bin_size
+            # lmax = ymin + (i + 1) * bin_size
+
+        for i in data.y:
+            for j in range(len(x)):
+                if x[j] <= i < x[j] + bin_size:
+                    bins[j] += 1
+                    break
 
         return s.plot.hist(bins=M)
 

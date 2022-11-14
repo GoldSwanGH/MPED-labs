@@ -1,5 +1,6 @@
 import copy
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -49,7 +50,9 @@ class Processing:
 
     @staticmethod
     def anti_trend_non_linear(data, W=10):
+
         new_data = copy.deepcopy(data)
+        exp_trend = copy.deepcopy(data)
 
         for i in range(data.N - W):
             trend_elem = 0
@@ -57,12 +60,41 @@ class Processing:
                 trend_elem += data.y[i + k]
             trend_elem = trend_elem / W
             new_data.y[i] = data.y[i] - trend_elem
+            exp_trend.y[i] = trend_elem
+        new_data.N = data.N - W
+        new_data.x = new_data.x[:-W]
+        new_data.y = new_data.y[:-W]
+        exp_trend.N = data.N - W
+        exp_trend.x = exp_trend.x[:-W]
+        exp_trend.y = exp_trend.y[:-W]
+        print("Выделенный экспоненциальный тренд")
+        plt.plot(exp_trend.x, exp_trend.y)
+        plt.show()
+        print("Нажмите Enter для следующего графика...")
+        input()
 
-        # for i in range(data.N - 1, data.N - W - 1):
+        # end_data = copy.deepcopy(data)
+        # end_data.y = np.empty(W)
+        # j = data.N - 1
+        # end = data.N - W - 1
+        # ctr = 0
+        # while True:
+        #     if j == end:
+        #         break
         #     trend_elem = 0
         #     for k in range(W):
-        #         trend_elem += data.y[i - k]
+        #         trend_elem += data.y[j - k]
         #     trend_elem = trend_elem / W
-        #     new_data.y[i] = data.y[i] - trend_elem
+        #     end_data.y[ctr] = data.y[j] - trend_elem
+        #     j -= 1
+        #     ctr += 1
+        # end_data.N = ctr
+        # end_data = Processing.anti_shift(end_data)
+        #
+        # end = data.N - 1
+        # j = data.N - W - 1
+        # for i in end_data.y:
+        #     new_data.y[j] = i
+        #     j += 1
 
         return new_data
