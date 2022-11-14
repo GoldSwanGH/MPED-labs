@@ -1,3 +1,4 @@
+import copy
 import math
 
 import matplotlib.pyplot as plt
@@ -143,3 +144,38 @@ class Analysis:
         Rxy = np.array(Rxy)
         Rxy = Rxy / dataX.N
         return Rxy
+
+    @staticmethod
+    def fourier(data, window=0):
+        data_copy = copy.deepcopy(data)
+        Xn = copy.deepcopy(data)
+        if window != 0:
+            for i in range(data.N - window, data.N):
+                data_copy.y[i] = 0
+        # Re = []
+        # Im = []
+        for i in range(data.N):
+            elemRe = 0
+            elemIm = 0
+            for j in range(data.N):
+                elemRe += data_copy.y[j] * np.cos((2 * np.pi * i * j) / data.N)
+                elemIm += data_copy.y[j] * np.sin((2 * np.pi * i * j) / data.N)
+            elemRe = elemRe / data.N
+            elemIm = elemIm / data.N
+            # Re.append(elemRe)
+            # Im.append(elemIm)
+            Xn.y[i] = np.sqrt(elemRe ** 2 + elemIm ** 2)
+
+        return Xn
+
+    @staticmethod
+    def spectre_fourier(Xn, dt):
+        f_gr = 1 / (2 * dt)
+        f_d = 2 * f_gr
+        df = f_d / Xn.N
+        N = int(Xn.N / 2)
+        Xn.x = Xn.x[:N]
+        Xn.y = Xn.y[:N]
+        Xn.x = Xn.x * df
+        plt.plot(Xn.x, Xn.y)
+        plt.show()
