@@ -5,9 +5,10 @@ import numpy as np
 
 class NoiseData:
 
-    def __init__(self, N, R, noise_type: NoiseType):
+    def __init__(self, noise_type=NoiseType.DEFAULT, N=1000, R=10):
         self.N = N
-        self.type = type
+        self.R = R
+        self.type = noise_type
 
         self.x = np.arange(N)
         if noise_type == NoiseType.DEFAULT:

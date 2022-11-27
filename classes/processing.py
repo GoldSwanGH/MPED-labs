@@ -3,6 +3,9 @@ import copy
 import matplotlib.pyplot as plt
 import numpy as np
 
+from classes.noise_data import NoiseData
+from classes.model import Model
+
 
 class Processing:
 
@@ -98,3 +101,22 @@ class Processing:
         #     j += 1
 
         return new_data
+
+    @staticmethod
+    def anti_noise(data=None, M=1):
+        if data is None:
+            data = NoiseData(N=1000, R=30)
+            data.y = data.y / M
+            for i in range(M - 1):
+                noise = NoiseData(noise_type=data.type, N=data.N, R=data.R)
+                data.y += noise.y / M
+            return data
+        else:
+            noise = NoiseData(N=data.N, R=30)
+            additive = Model.add_model(noise, data)
+            additive.y = additive.y / M
+            for i in range(M - 1):
+                noise = NoiseData(noise_type=additive.type, N=additive.N, R=additive.R)
+                new_add = Model.add_model(noise, data)
+                additive.y += new_add.y / M
+            return additive

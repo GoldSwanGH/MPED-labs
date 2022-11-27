@@ -361,8 +361,46 @@ while True:
         Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=224))
 
     elif i == 10:
+        print("Подавление случайного шума")
+        for M in [1, 10, 100, 10000]:
+            anti_noise = Processing.anti_noise(M=M)
+            plt.plot(anti_noise.x, anti_noise.y)
+            plt.show()
 
-        pass
+            print("Стандартное отклонение при M = " + str(M) + ": " + str(anti_noise.y.std()))
+            print("Нажмите Enter для следующего графика...")
+            input()
+
+        M_values = []
+        M_std_results = []
+        M_values.append(1)
+        for i in range(10, 1001, 10):
+            M_values.append(i)
+
+        for i in M_values:
+            anti_noise = Processing.anti_noise(M=i)
+            M_std_results.append(anti_noise.y.std())
+
+        M_values = np.array(M_values)
+        M_std_results = np.array(M_std_results)
+
+        plt.plot(M_values, M_std_results)
+        plt.show()
+
+        print("График зависимости стандартного отклонения от M")
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        harm = Model.harm(dt=0.001, f0=5, A0=10)
+        print("Подавление случайного шума в аддитивной модели шума и гармонического процесса")
+        for M in [1, 10, 100, 10000]:
+            anti_noise = Processing.anti_noise(data=harm, M=M)
+            plt.plot(anti_noise.x, anti_noise.y)
+            plt.show()
+
+            print("Стандартное отклонение при M = " + str(M) + ": " + str(anti_noise.y.std()))
+            print("Нажмите Enter для следующего графика...")
+            input()
 
     elif i == 11:
         pass

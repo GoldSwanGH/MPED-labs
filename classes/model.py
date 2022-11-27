@@ -8,7 +8,6 @@ from classes.polyharm_data import PolyHarmData
 from classes.trend_data import TrendData
 
 
-
 class Model:
 
     @staticmethod
@@ -16,11 +15,11 @@ class Model:
         return TrendData(N, a, b, data_type)
 
     @staticmethod
-    def noise(N, R):  # Task 2
+    def noise(N=1000, R=10):  # Task 2
         return NoiseData(N, R, NoiseType.DEFAULT)
 
     @staticmethod
-    def my_noise(N, R):  # Task 2
+    def my_noise(N=1000, R=10):  # Task 2
         return NoiseData(N, R, NoiseType.CUSTOM)
 
     @staticmethod
