@@ -8,5 +8,6 @@ class HarmData:
         self.N = N
         self.A = A0
         self.f = f0
+        self.dt = dt
         self.x = np.arange(N)
         self.y = A0 * np.sin(2 * math.pi * f0 * dt * self.x)

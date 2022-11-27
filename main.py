@@ -9,7 +9,7 @@ from classes.processing import Processing
 
 
 while True:
-    print("Введите номер задания (от 1 до 9) или 0 для выхода: ")
+    print("Введите номер задания (от 1 до 13) или 0 для выхода: ")
     i = int(input())
 
     if i == 1:
@@ -295,21 +295,22 @@ while True:
         plt.show()
 
     elif i == 9:
-        harm = Model.harm()
-        polyharm = Model.poly_harm()
 
-        dt = 0.001
+        dt = 0.002
+
+        harm = Model.harm(dt=dt)
+        polyharm = Model.poly_harm(dt=dt)
 
         print("Амплитудный спектр Фурье для гармонического процесса")
 
-        Analysis.spectre_fourier(Xn=Analysis.fourier(harm), dt=dt)
+        Analysis.spectre_fourier(Xn=Analysis.fourier(harm))
 
         print("Нажмите Enter для следующего графика...")
         input()
 
         print("Амплитудный спектр Фурье для полигармонического процесса")
 
-        Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm), dt=dt)
+        Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm))
 
         print("Нажмите Enter для следующего графика...")
         input()
@@ -317,7 +318,7 @@ while True:
         print("Амплитудный спектр Фурье для гармонического процесса c окном 24")
 
         harm = Model.harm(N=1024)
-        Analysis.spectre_fourier(Xn=Analysis.fourier(harm, window=24), dt=dt)
+        Analysis.spectre_fourier(Xn=Analysis.fourier(harm, window=24))
 
         print("Нажмите Enter для следующего графика...")
         input()
@@ -325,7 +326,7 @@ while True:
         print("Амплитудный спектр Фурье для полигармонического процесса c окном 24")
 
         polyharm = Model.poly_harm(N=1024)
-        Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=24), dt=dt)
+        Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=24))
 
         print("Нажмите Enter для следующего графика...")
         input()
@@ -333,7 +334,7 @@ while True:
         print("Амплитудный спектр Фурье для гармонического процесса c окном 124")
 
         harm = Model.harm(N=1024)
-        Analysis.spectre_fourier(Xn=Analysis.fourier(harm, window=124), dt=dt)
+        Analysis.spectre_fourier(Xn=Analysis.fourier(harm, window=124))
 
         print("Нажмите Enter для следующего графика...")
         input()
@@ -341,7 +342,7 @@ while True:
         print("Амплитудный спектр Фурье для полигармонического процесса c окном 124")
 
         polyharm = Model.poly_harm(N=1024)
-        Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=124), dt=dt)
+        Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=124))
 
         print("Нажмите Enter для следующего графика...")
         input()
@@ -349,7 +350,7 @@ while True:
         print("Амплитудный спектр Фурье для гармонического процесса c окном 224")
 
         harm = Model.harm(N=1024)
-        Analysis.spectre_fourier(Xn=Analysis.fourier(harm, window=224), dt=dt)
+        Analysis.spectre_fourier(Xn=Analysis.fourier(harm, window=224))
 
         print("Нажмите Enter для следующего графика...")
         input()
@@ -357,7 +358,20 @@ while True:
         print("Амплитудный спектр Фурье для полигармонического процесса c окном 224")
 
         polyharm = Model.poly_harm(N=1024)
-        Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=224), dt=dt)
+        Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=224))
+
+    elif i == 10:
+
+        pass
+
+    elif i == 11:
+        pass
+
+    elif i == 12:
+        pass
+
+    elif i == 13:
+        pass
 
     elif i == 0:
         exit(0)

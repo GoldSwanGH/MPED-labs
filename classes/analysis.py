@@ -169,8 +169,8 @@ class Analysis:
         return Xn
 
     @staticmethod
-    def spectre_fourier(Xn, dt):
-        f_gr = 1 / (2 * dt)
+    def spectre_fourier(Xn):
+        f_gr = 1 / (2 * Xn.dt)
         f_d = 2 * f_gr
         df = f_d / Xn.N
         N = int(Xn.N / 2)

@@ -52,8 +52,8 @@ class Model:
         return HarmData(N, A0, dt, f0)
 
     @staticmethod
-    def poly_harm(N=1000, A0=100, f0=33, A1=100, f1=33, A2=100, f2=33, dt=0.001):
-        return PolyHarmData(N, A0, dt, f0)
+    def poly_harm(N=1000, A0=100, f0=33, A1=15, f1=5, A2=10, f2=170, dt=0.001):
+        return PolyHarmData(N=N, A0=A0, dt=dt, f0=f0, A1=A1, f1=f1, A2=A2, f2=f2)
 
     @staticmethod
     def add_model(data1, data2):
