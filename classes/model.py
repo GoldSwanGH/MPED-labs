@@ -16,11 +16,11 @@ class Model:
 
     @staticmethod
     def noise(N=1000, R=10):  # Task 2
-        return NoiseData(N, R, NoiseType.DEFAULT)
+        return NoiseData(N=N, R=R, noise_type=NoiseType.DEFAULT)
 
     @staticmethod
     def my_noise(N=1000, R=10):  # Task 2
-        return NoiseData(N, R, NoiseType.CUSTOM)
+        return NoiseData(N=N, R=R, noise_type=NoiseType.CUSTOM)
 
     @staticmethod
     def shift(in_data, C):  # Task 4
@@ -61,4 +61,9 @@ class Model:
 
         return data
 
+    @staticmethod
+    def mult_model(data1, data2):
+        data = copy.deepcopy(data1)
+        data.y = data1.y * data2.y
 
+        return data

@@ -170,12 +170,32 @@ class Analysis:
 
     @staticmethod
     def spectre_fourier(Xn):
-        f_gr = 1 / (2 * Xn.dt)
+        new_Xn = copy.deepcopy(Xn)
+        f_gr = 1 / (2 * new_Xn.dt)
         f_d = 2 * f_gr
-        df = f_d / Xn.N
-        N = int(Xn.N / 2)
-        Xn.x = Xn.x[:N]
-        Xn.y = Xn.y[:N]
-        Xn.x = Xn.x * df
-        plt.plot(Xn.x, Xn.y)
-        plt.show()
+        df = f_d / new_Xn.N
+        N = int(new_Xn.N / 2)
+        new_Xn.x = new_Xn.x[:N]
+        new_Xn.y = new_Xn.y[:N]
+        new_Xn.x = new_Xn.x * df
+        new_Xn.N = N
+
+        return new_Xn
+
+    # @staticmethod
+    # def harm_search(spec, e=0.05):  # e - порог срабатывания
+    #     freqs = []
+    #     ampls = []
+    #
+    #     if spec.y[0] - spec.y[1] > e:
+    #         freqs.append(spec.x[0])
+    #         ampls.append(int(float(spec.y[0]) * 2))
+    #     for i in range(1, len(spec.y) - 1):
+    #         if spec.y[i] - spec.y[i - 1] > e and spec.y[i] - spec.y[i + 1] > e:
+    #             freqs.append(spec.x[i])
+    #             ampls.append(int(round(float(spec.y[i]) * 2)))
+    #     if spec.y[len(spec.y) - 1] - spec.y[len(spec.y) - 2] > e:
+    #         freqs.append(spec.x[len(spec.y) - 1])
+    #         ampls.append(int(float(spec.y[len(spec.y) - 1]) * 2))
+    #
+    #     return [freqs, ampls]

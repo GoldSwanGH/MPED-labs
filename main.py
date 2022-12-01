@@ -5,10 +5,12 @@ import numpy as np
 from classes.analysis import Analysis
 from classes.data_type import DataType
 from classes.model import Model
+from classes.in_out import InOut
 from classes.processing import Processing
 
 
 while True:
+    plt.rcParams["figure.figsize"] = (9.6, 7.2)  # 4:3 формат графиков по умолчанию (оставил), увеличил разрешение в 1.5 раза
     print("Введите номер задания (от 1 до 13) или 0 для выхода: ")
     i = int(input())
 
@@ -303,14 +305,18 @@ while True:
 
         print("Амплитудный спектр Фурье для гармонического процесса")
 
-        Analysis.spectre_fourier(Xn=Analysis.fourier(harm))
+        spec = Analysis.spectre_fourier(Xn=Analysis.fourier(harm))
+        plt.plot(spec.x, spec.y)
+        plt.show()
 
         print("Нажмите Enter для следующего графика...")
         input()
 
         print("Амплитудный спектр Фурье для полигармонического процесса")
 
-        Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm))
+        spec = Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm))
+        plt.plot(spec.x, spec.y)
+        plt.show()
 
         print("Нажмите Enter для следующего графика...")
         input()
@@ -318,7 +324,9 @@ while True:
         print("Амплитудный спектр Фурье для гармонического процесса c окном 24")
 
         harm = Model.harm(N=1024)
-        Analysis.spectre_fourier(Xn=Analysis.fourier(harm, window=24))
+        spec = Analysis.spectre_fourier(Xn=Analysis.fourier(harm, window=24))
+        plt.plot(spec.x, spec.y)
+        plt.show()
 
         print("Нажмите Enter для следующего графика...")
         input()
@@ -326,7 +334,9 @@ while True:
         print("Амплитудный спектр Фурье для полигармонического процесса c окном 24")
 
         polyharm = Model.poly_harm(N=1024)
-        Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=24))
+        spec = Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=24))
+        plt.plot(spec.x, spec.y)
+        plt.show()
 
         print("Нажмите Enter для следующего графика...")
         input()
@@ -334,7 +344,9 @@ while True:
         print("Амплитудный спектр Фурье для гармонического процесса c окном 124")
 
         harm = Model.harm(N=1024)
-        Analysis.spectre_fourier(Xn=Analysis.fourier(harm, window=124))
+        spec = Analysis.spectre_fourier(Xn=Analysis.fourier(harm, window=124))
+        plt.plot(spec.x, spec.y)
+        plt.show()
 
         print("Нажмите Enter для следующего графика...")
         input()
@@ -342,7 +354,9 @@ while True:
         print("Амплитудный спектр Фурье для полигармонического процесса c окном 124")
 
         polyharm = Model.poly_harm(N=1024)
-        Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=124))
+        spec = Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=124))
+        plt.plot(spec.x, spec.y)
+        plt.show()
 
         print("Нажмите Enter для следующего графика...")
         input()
@@ -350,7 +364,9 @@ while True:
         print("Амплитудный спектр Фурье для гармонического процесса c окном 224")
 
         harm = Model.harm(N=1024)
-        Analysis.spectre_fourier(Xn=Analysis.fourier(harm, window=224))
+        spec = Analysis.spectre_fourier(Xn=Analysis.fourier(harm, window=224))
+        plt.plot(spec.x, spec.y)
+        plt.show()
 
         print("Нажмите Enter для следующего графика...")
         input()
@@ -358,7 +374,9 @@ while True:
         print("Амплитудный спектр Фурье для полигармонического процесса c окном 224")
 
         polyharm = Model.poly_harm(N=1024)
-        Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=224))
+        spec = Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=224))
+        plt.plot(spec.x, spec.y)
+        plt.show()
 
     elif i == 10:
         print("Подавление случайного шума")
@@ -403,13 +421,215 @@ while True:
             input()
 
     elif i == 11:
-        pass
+        data = InOut.read_dat("data/pgp_2ms.dat")
+        print(len(data))
+        plt.plot(np.arange(1000), data)
+        plt.show()
+
+        print("Прочитанные данные из файла")
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        harm = Model.harm(N=1000, dt=0.002)
+        harm.y = data
+        spec = Analysis.spectre_fourier(Xn=Analysis.fourier(harm))
+        plt.plot(spec.x, spec.y)
+        plt.show()
+
+        freqs = []
+        ampls = []
+        e = 0.05  # порог
+
+        if spec.y[0] - spec.y[1] > e:
+            freqs.append(spec.x[0])
+            ampls.append(float(spec.y[0]) * 2)
+        for i in range(1, len(spec.y) - 1):
+            if spec.y[i] - spec.y[i - 1] > e and spec.y[i] - spec.y[i + 1] > e:
+                freqs.append(spec.x[i])
+                ampls.append(float(spec.y[i]) * 2)
+        if spec.y[len(spec.y) - 1] - spec.y[len(spec.y) - 2] > e:
+            freqs.append(spec.x[len(spec.y) - 1])
+            ampls.append(float(spec.y[len(spec.y) - 1]) * 2)
+
+        print("Амплитудный спектр данных из файла")
+        print("Гармоники:")
+        for i in range(0, len(freqs)):
+            print(str(i + 1) + ". Частота " + str(freqs[i]) + ", амплитуда " + str(ampls[i]))
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        N = 1000
+        M = 200
+
+        harm = Model.harm(N=M, A0=1, f0=7, dt=0.005)
+        trend = Model.trend(N=M, a=-30*0.005, b=1, data_type=DataType.EXPONENTIAL)
+        ht = Model.mult_model(harm, trend)
+        max_ht = ht.y.max(initial=float('-inf'))
+        ht.y = (ht.y / max_ht) * 120
+
+        xt = Model.noise(N=N, R=0)
+        for i in [200, 400, 600, 800]:
+            xt.y[i] = np.random.uniform(0.9, 1.1)
+
+        yt = Model.noise(N=N + M, R=0)
+
+        for k in range(N + M):
+            yt.y[k] = 0
+            for m in range(M):
+                if k < m or k >= 1000:
+                    continue
+                yt.y[k] += xt.y[k - m] * ht.y[m]
+
+        yt.y = yt.y[:N]
+        yt.x = yt.x[:N]
+        yt.N = N
+
+        plt.rcParams["figure.figsize"] = (8, 13)
+
+        plt.subplot(311)
+        plt.plot(ht.x, ht.y)
+        plt.xlabel("Импульсная реакция линейной модели сердечной мышцы")
+        plt.subplot(312)
+        plt.plot(xt.x, xt.y)
+        plt.xlabel("Управляющая функция ритма")
+        plt.subplot(313)
+        plt.plot(yt.x, yt.y)
+        plt.xlabel("Первое приближение модели кардиограммы")
+        plt.subplots_adjust(hspace=0.5)
+        plt.show()
 
     elif i == 12:
-        pass
+        m = 64
+        dt = 0.002
+
+        lpf = Model.poly_harm(N=(m * 2 + 1), dt=dt)
+        hpf = Model.poly_harm(N=(m * 2 + 1), dt=dt)
+        bpf = Model.poly_harm(N=(m * 2 + 1), dt=dt)
+        bsf = Model.poly_harm(N=(m * 2 + 1), dt=dt)
+
+        lpf.y = Processing.lpf(m=m, dt=dt)
+        hpf.y = Processing.hpf(m=m, dt=dt)
+        bpf.y = Processing.bpf(m=m, dt=dt)
+        bsf.y = Processing.bsf(m=m, dt=dt)
+
+        plt.rcParams["figure.figsize"] = (8, 13)
+
+        plt.subplot(411)
+        plt.plot(lpf.x, lpf.y)
+        plt.xlabel("lpf")
+        plt.subplot(412)
+        plt.plot(hpf.x, hpf.y)
+        plt.xlabel("hpf")
+        plt.subplot(413)
+        plt.plot(bpf.x, bpf.y)
+        plt.xlabel("bpf")
+        plt.subplot(414)
+        plt.plot(bsf.x, bsf.y)
+        plt.xlabel("bsf")
+        plt.subplots_adjust(hspace=0.5)
+        plt.show()
+
+        print("Графики весовых функций")
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        spec_lpf = Analysis.spectre_fourier(Analysis.fourier(lpf))
+        spec_lpf.y = spec_lpf.y * (m * 2 + 1)
+        spec_hpf = Analysis.spectre_fourier(Analysis.fourier(hpf))
+        spec_hpf.y = spec_hpf.y * (m * 2 + 1)
+        spec_bpf = Analysis.spectre_fourier(Analysis.fourier(bpf))
+        spec_bpf.y = spec_bpf.y * (m * 2 + 1)
+        spec_bsf = Analysis.spectre_fourier(Analysis.fourier(bsf))
+        spec_bsf.y = spec_bsf.y * (m * 2 + 1)
+
+        plt.subplot(411)
+        plt.plot(spec_lpf.x, spec_lpf.y)
+        plt.xlabel("lpf")
+        plt.subplot(412)
+        plt.plot(spec_hpf.x, spec_hpf.y)
+        plt.xlabel("hpf")
+        plt.subplot(413)
+        plt.plot(spec_bpf.x, spec_bpf.y)
+        plt.xlabel("bpf")
+        plt.subplot(414)
+        plt.plot(spec_bsf.x, spec_bsf.y)
+        plt.xlabel("bsf")
+        plt.subplots_adjust(hspace=0.5)
+        plt.show()
+
+        print("Амплитудный спектр весовых функций")
 
     elif i == 13:
-        pass
+
+        data = InOut.read_dat("data/pgp_2ms.dat")
+        print(len(data))
+
+        polyharm = Model.harm(N=1000, dt=0.002)
+        polyharm.y = data
+        spec = Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm))
+
+        freqs = []
+        ampls = []
+        e = 0.05  # порог
+
+        if spec.y[0] - spec.y[1] > e:
+            freqs.append(spec.x[0])
+            ampls.append(float(spec.y[0]) * 2)
+        for i in range(1, len(spec.y) - 1):
+            if spec.y[i] - spec.y[i - 1] > e and spec.y[i] - spec.y[i + 1] > e:
+                freqs.append(spec.x[i])
+                ampls.append(float(spec.y[i]) * 2)
+        if spec.y[len(spec.y) - 1] - spec.y[len(spec.y) - 2] > e:
+            freqs.append(spec.x[len(spec.y) - 1])
+            ampls.append(float(spec.y[len(spec.y) - 1]) * 2)
+
+        print("Гармоники:")
+        for i in range(0, len(freqs)):
+            print(str(i + 1) + ". Частота " + str(freqs[i]) + ", амплитуда " + str(ampls[i]))
+
+        plt.rcParams["figure.figsize"] = (8, 13)
+
+        m = 128
+        dt = 0.002
+        filters = [Processing.lpf(m=m, dt=dt, fc=13),
+                   Processing.hpf(m=m, dt=dt, fc=90),
+                   Processing.bpf(m=m, dt=dt, fc1=18, fc2=42),
+                   Processing.bsf(m=m, dt=dt, fc1=6, fc2=40)]
+
+        for filt in filters:
+            plt.subplot(511)
+            plt.plot(np.arange(1000), data)
+            plt.xlabel("Исходные данные")
+
+            plt.subplot(512)
+            plt.plot(spec.x, spec.y)
+            plt.xlabel("Спектр исходных данные")
+
+            plt.subplot(513)
+            packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)
+            packed_filter.y = filt
+            spec_filt = Analysis.spectre_fourier(Analysis.fourier(packed_filter))
+            spec_filt.y = spec_filt.y * (m * 2 + 1)
+            plt.plot(spec_filt.x, spec_filt.y)
+            plt.xlabel("Частотная характеристика фильтра")
+
+            plt.subplot(514)
+            filtered = Processing.convol(polyharm, packed_filter)
+            filtered.N = 900
+            filtered.x = filtered.x[100:1000]
+            filtered.y = filtered.y[100:1000]
+            plt.plot(filtered.x, filtered.y)
+            plt.xlabel("Отфильтрованные данные")
+
+            plt.subplot(515)
+            spec_filtered = Analysis.spectre_fourier(Analysis.fourier(filtered))
+            plt.plot(spec_filtered.x, spec_filtered.y)
+            plt.xlabel("Спектр отфильтрованных данных")
+            plt.subplots_adjust(hspace=0.3)
+
+            plt.show()
+            print("Нажмите Enter для следующего графика...")
+            input()
 
     elif i == 0:
         exit(0)

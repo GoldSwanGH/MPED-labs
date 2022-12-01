@@ -1,4 +1,5 @@
 import copy
+import math
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -120,3 +121,90 @@ class Processing:
                 new_add = Model.add_model(noise, data)
                 additive.y += new_add.y / M
             return additive
+
+    @staticmethod
+    def lpf(fc=50, dt=0.002, m=64):
+        lpw = []
+        d = [0.35577019, 0.2436983, 0.07211497, 0.00630165]
+        # rectangular part weights
+        fact = 2 * fc * dt
+        lpw.append(fact)
+        arg = fact * math.pi
+
+        for i in range(1, m + 1):
+            lpw.append(math.sin(arg * i)/(math.pi * i))
+        # trapezoid smoothing at the end
+        lpw[m] /= 2
+        # P310 smoothing window
+        sumg = lpw[0]
+        for i in range(1, m + 1):
+            sum = d[0]
+            arg = math.pi * i / m
+            for k in range(1, 4):
+                sum += 2.0 * d[k] * math.cos(arg * k)
+            lpw[i] *= sum
+            sumg += 2 * lpw[i]
+
+        for i in range(0, m + 1):
+            lpw[i] /= sumg
+
+        lpw = np.array(lpw)
+        inverse = np.flip(lpw.copy()[1:])
+        lpw = np.concatenate([inverse, lpw])
+
+        return lpw
+
+    @staticmethod
+    def hpf(fc=50, dt=0.002, m=64):
+        lpw = Processing.lpf(fc, dt, m)
+        looper = 2 * m + 1
+        hpw = []
+        for k in range(looper):
+            if k == m:
+                hpw.append(1.0 - lpw[k])
+            else:
+                hpw.append(-lpw[k])
+
+        hpw = np.array(hpw)
+        return hpw
+
+    @staticmethod
+    def bpf(fc1=35, fc2=75, dt=0.002, m=64):
+        lpw1 = Processing.lpf(fc1, dt, m)
+        lpw2 = Processing.lpf(fc2, dt, m)
+        looper = 2 * m + 1
+        bpw = []
+        for k in range(looper):
+            bpw.append(lpw2[k] - lpw1[k])
+
+        bpw = np.array(bpw)
+        return bpw
+
+    @staticmethod
+    def bsf(fc1=35, fc2=75, dt=0.002, m=64):
+        lpw1 = Processing.lpf(fc1, dt, m)
+        lpw2 = Processing.lpf(fc2, dt, m)
+        looper = 2 * m + 1
+        bsw = []
+        for k in range(looper):
+            if k == m:
+                bsw.append(1.0 + lpw1[k] - lpw2[k])
+            else:
+                bsw.append(lpw1[k] - lpw2[k])
+
+        bsw = np.array(bsw)
+        return bsw
+
+    @staticmethod
+    def convol(xt, ht):
+        yt = Model.harm(N=xt.N + ht.N, dt=xt.dt)
+        nulls = Model.noise(N=xt.N + ht.N, R=0)
+        yt.y = nulls.y
+        for k in range(xt.N + ht.N):
+            yt.y[k] = 0
+            for m in range(ht.N):
+                if k < m or k >= 1000:
+                    continue
+                yt.y[k] += xt.y[k - m] * ht.y[m]
+
+        return yt
