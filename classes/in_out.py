@@ -1,5 +1,5 @@
 import struct
-
+import uuid
 import numpy as np
 
 
@@ -17,5 +17,15 @@ class InOut:
         return floats
 
     @staticmethod
-    def write_dat():
+    def write_dat(path_to_file, data):
+        bytesarr = bytearray(data)
+        with open(path_to_file + "newfile_" + str(uuid.uuid4()) + ".dat", mode="wb") as file:
+            file.write(bytesarr)
+
+    @staticmethod
+    def read_wav():
+        pass
+
+    @staticmethod
+    def write_wav():
         pass

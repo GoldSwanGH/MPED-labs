@@ -422,7 +422,6 @@ while True:
 
     elif i == 11:
         data = InOut.read_dat("data/pgp_2ms.dat")
-        print(len(data))
         plt.plot(np.arange(1000), data)
         plt.show()
 
@@ -562,7 +561,6 @@ while True:
     elif i == 13:
 
         data = InOut.read_dat("data/pgp_2ms.dat")
-        print(len(data))
 
         polyharm = Model.harm(N=1000, dt=0.002)
         polyharm.y = data
