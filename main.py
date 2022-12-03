@@ -392,7 +392,7 @@ while True:
         M_values = []
         M_std_results = []
         M_values.append(1)
-        for i in range(10, 1001, 10):
+        for i in range(10, 1001, 20):
             M_values.append(i)
 
         for i in M_values:
@@ -422,8 +422,11 @@ while True:
 
     elif i == 11:
         data = InOut.read_dat("data/pgp_2ms.dat")
+        # data = InOut.read_dat("data/newfile_a1fc33f6-e871-431c-b0dd-990a34bb1340.dat")
         plt.plot(np.arange(1000), data)
         plt.show()
+
+        InOut.write_dat("data/", data)
 
         print("Прочитанные данные из файла")
         print("Нажмите Enter для следующего графика...")
