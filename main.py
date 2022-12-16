@@ -11,7 +11,7 @@ from classes.processing import Processing
 
 while True:
     plt.rcParams["figure.figsize"] = (9.6, 7.2)  # 4:3 формат графиков по умолчанию (оставил), увеличил разрешение в 1.5 раза
-    print("Введите номер задания (от 1 до 13) или 0 для выхода: ")
+    print("Введите номер задания (от 1 до 15) или 0 для выхода: ")
     i = int(input())
 
     if i == 1:
@@ -631,6 +631,12 @@ while True:
             plt.show()
             print("Нажмите Enter для следующего графика...")
             input()
+
+    elif i == 14:
+        pass
+
+    elif i == 15:
+        pass
 
     elif i == 0:
         exit(0)
