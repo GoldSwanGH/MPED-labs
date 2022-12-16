@@ -29,7 +29,9 @@ class InOut:
 
     @staticmethod
     def read_wav(path):
-        pass
+        samplerate, data = wavfile.read(path)
+        return samplerate, data
+
 
     @staticmethod
     def write_wav(path_to_file, data):
