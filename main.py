@@ -633,7 +633,9 @@ while True:
             input()
 
     elif i == 14:
-        pass
+        samplerate, data = InOut.read_wav("data/vina.wav")
+        print(samplerate)
+        print(len(data))
 
     elif i == 15:
         pass
