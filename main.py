@@ -633,7 +633,7 @@ while True:
             input()
 
     elif i == 14:
-        rate, data = InOut.read_wav("data/январь.wav")
+        rate, data = InOut.read_wav("data/вИна.wav")
         N = len(data)
         dt = 1 / rate
 
@@ -650,16 +650,19 @@ while True:
 
         multdata.y = np.ndarray([N], dtype=float)
 
-        for i in range(2500):
+        for i in range(5000):
             multdata.y[i] = 0.0
 
-        for i in range(2500, 12000):
-            multdata.y[i] = 2.0
+        for i in range(5000, 14000):
+            multdata.y[i] = 0.5
 
-        for i in range(14000, 20000):
-            multdata.y[i] = 0.6
+        for i in range(14000, 16000):
+            multdata.y[i] = 0.0
 
-        for i in range(20000, N):
+        for i in range(16000, 21700):
+            multdata.y[i] = 4.0
+
+        for i in range(21700, N):
             multdata.y[i] = 0.0
 
         result = Model.mult_model(model, multdata)
