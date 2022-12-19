@@ -1,5 +1,7 @@
 import struct
 import uuid
+from random import random
+
 from scipy.io import wavfile
 import numpy
 import numpy as np
@@ -32,7 +34,6 @@ class InOut:
         samplerate, data = wavfile.read(path)
         return samplerate, data
 
-
     @staticmethod
-    def write_wav(path_to_file, data):
-        pass
+    def write_wav(path_to_file, data, rate):
+        wavfile.write(filename=path_to_file + "sound_" + str(uuid.uuid4()) + ".wav", rate=rate, data=data)

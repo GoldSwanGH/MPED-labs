@@ -633,9 +633,46 @@ while True:
             input()
 
     elif i == 14:
-        samplerate, data = InOut.read_wav("data/vina.wav")
-        print(samplerate)
-        print(len(data))
+        rate, data = InOut.read_wav("data/январь.wav")
+        N = len(data)
+        dt = 1 / rate
+
+        model = Model.poly_harm(N=N, dt=dt)
+        model.y = data
+        plt.plot(model.x, model.y)
+        plt.xlabel("Осциллограмма голосовой записи")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        multdata = Model.trend(N=N, data_type=DataType.LINEAR, a=0, b=0)
+
+        multdata.y = np.ndarray([N], dtype=float)
+
+        for i in range(2500):
+            multdata.y[i] = 0.0
+
+        for i in range(2500, 12000):
+            multdata.y[i] = 2.0
+
+        for i in range(14000, 20000):
+            multdata.y[i] = 0.6
+
+        for i in range(20000, N):
+            multdata.y[i] = 0.0
+
+        result = Model.mult_model(model, multdata)
+        result.y = result.y.astype(dtype="int16")
+        plt.plot(result.x, result.y)
+        plt.xlabel("Осциллограмма голосовой записи после изменения ударения")
+        plt.show()
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        InOut.write_wav(path_to_file="data/", rate=rate, data=result.y)
+        # InOut.write_wav(path_to_file="data/", rate=rate, data=data)
+        print("wav файл был записан")
 
     elif i == 15:
         pass
