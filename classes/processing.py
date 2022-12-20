@@ -203,7 +203,7 @@ class Processing:
         for k in range(xt.N + ht.N):
             yt.y[k] = 0
             for m in range(ht.N):
-                if k < m or k >= 1000:
+                if k < m or k >= xt.N:
                     continue
                 yt.y[k] += xt.y[k - m] * ht.y[m]
 
