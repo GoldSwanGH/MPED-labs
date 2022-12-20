@@ -21,12 +21,12 @@ class InOut:
         return floats
 
     @staticmethod
-    def write_dat(path_to_file, data):
+    def write_dat(path_to_file, data, file_name="newfile_" + str(uuid.uuid4())):
         if isinstance(data, np.ndarray):
             bytesarr = data.tobytes()
         else:
             bytesarr = bytearray(data)
-        with open(path_to_file + "newfile_" + str(uuid.uuid4()) + ".dat", mode="wb") as file:
+        with open(path_to_file + file_name + ".dat", mode="wb") as file:
             file.write(bytesarr)
 
     @staticmethod
@@ -35,5 +35,6 @@ class InOut:
         return samplerate, data
 
     @staticmethod
-    def write_wav(path_to_file, data, rate):
-        wavfile.write(filename=path_to_file + "sound_" + str(uuid.uuid4()) + ".wav", rate=rate, data=data)
+    def write_wav(path_to_file, data, rate, file_name="sound_" + str(uuid.uuid4())):
+        data = data.astype(dtype="int16")
+        wavfile.write(filename=path_to_file + file_name + ".wav", rate=rate, data=data)

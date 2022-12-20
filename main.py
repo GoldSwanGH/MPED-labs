@@ -1,6 +1,8 @@
+import copy
 from sys import exit
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 from classes.analysis import Analysis
 from classes.data_type import DataType
@@ -300,8 +302,8 @@ while True:
 
         dt = 0.002
 
-        harm = Model.harm(dt=dt)
-        polyharm = Model.poly_harm(dt=dt)
+        harm = Model.harm(N=1000, dt=dt, f0=33)
+        polyharm = Model.poly_harm(N=1000, dt=dt, f0=33, f1=5)
 
         print("Амплитудный спектр Фурье для гармонического процесса")
 
@@ -323,7 +325,7 @@ while True:
 
         print("Амплитудный спектр Фурье для гармонического процесса c окном 24")
 
-        harm = Model.harm(N=1024)
+        harm = Model.harm(N=1024, dt=dt)
         spec = Analysis.spectre_fourier(Xn=Analysis.fourier(harm, window=24))
         plt.plot(spec.x, spec.y)
         plt.show()
@@ -333,7 +335,7 @@ while True:
 
         print("Амплитудный спектр Фурье для полигармонического процесса c окном 24")
 
-        polyharm = Model.poly_harm(N=1024)
+        polyharm = Model.poly_harm(N=1024, dt=dt)
         spec = Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=24))
         plt.plot(spec.x, spec.y)
         plt.show()
@@ -343,7 +345,7 @@ while True:
 
         print("Амплитудный спектр Фурье для гармонического процесса c окном 124")
 
-        harm = Model.harm(N=1024)
+        harm = Model.harm(N=1024, dt=dt)
         spec = Analysis.spectre_fourier(Xn=Analysis.fourier(harm, window=124))
         plt.plot(spec.x, spec.y)
         plt.show()
@@ -353,7 +355,7 @@ while True:
 
         print("Амплитудный спектр Фурье для полигармонического процесса c окном 124")
 
-        polyharm = Model.poly_harm(N=1024)
+        polyharm = Model.poly_harm(N=1024, dt=dt)
         spec = Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=124))
         plt.plot(spec.x, spec.y)
         plt.show()
@@ -363,7 +365,7 @@ while True:
 
         print("Амплитудный спектр Фурье для гармонического процесса c окном 224")
 
-        harm = Model.harm(N=1024)
+        harm = Model.harm(N=1024, dt=dt)
         spec = Analysis.spectre_fourier(Xn=Analysis.fourier(harm, window=224))
         plt.plot(spec.x, spec.y)
         plt.show()
@@ -373,7 +375,7 @@ while True:
 
         print("Амплитудный спектр Фурье для полигармонического процесса c окном 224")
 
-        polyharm = Model.poly_harm(N=1024)
+        polyharm = Model.poly_harm(N=1024, dt=dt)
         spec = Analysis.spectre_fourier(Xn=Analysis.fourier(polyharm, window=224))
         plt.plot(spec.x, spec.y)
         plt.show()
@@ -426,7 +428,7 @@ while True:
         plt.plot(np.arange(1000), data)
         plt.show()
 
-        InOut.write_dat("data/", data)
+        # InOut.write_dat("data/", data)
 
         print("Прочитанные данные из файла")
         print("Нажмите Enter для следующего графика...")
@@ -678,7 +680,361 @@ while True:
         print("wav файл был записан")
 
     elif i == 15:
-        pass
+        rate, data = InOut.read_wav("data/вИна.wav")
+        N = len(data)
+        dt = 1 / rate
+        data = data.astype(dtype=np.float32)
 
-    elif i == 0:
+        model = Model.poly_harm(N=N, dt=dt)
+        model.y = data
+        plt.subplot(311)
+        plt.plot(model.x, model.y)
+        plt.xlabel("Осциллограмма голосовой записи")
+
+        syllable1_data = data[5000:14000]
+        syllable2_data = data[16000:21700]
+
+        syllable1 = Model.poly_harm(N=len(syllable1_data), dt=dt)
+        syllable1.y = syllable1_data
+        plt.subplot(312)
+        plt.plot(syllable1.x, syllable1.y)
+        plt.xlabel("Осциллограмма первого слога")
+
+        syllable2 = Model.poly_harm(N=len(syllable2_data), dt=dt)
+        syllable2.y = syllable2_data
+        plt.subplot(313)
+        plt.plot(syllable2.x, syllable2.y)
+        plt.xlabel("Осциллограмма второго слога")
+
+        plt.subplots_adjust(hspace=0.3)
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        if os.path.exists("data/spec_data.dat"):
+            raw_spec_data = InOut.read_dat("data/spec_data.dat")
+            spec_data = Model.poly_harm(N=len(raw_spec_data), dt=dt)
+            spec_data.y = raw_spec_data
+            spec_data.x = spec_data.x * (rate / (spec_data.N * 2))
+        else:
+            spec_data = Analysis.spectre_fourier(Xn=Analysis.fourier(model))
+            InOut.write_dat("data/", spec_data.y, file_name="spec_data")
+
+        if os.path.exists("data/spec_syllable1.dat"):
+            raw_spec_syllable1 = InOut.read_dat("data/spec_syllable1.dat")
+            spec_syllable1 = Model.poly_harm(N=len(raw_spec_syllable1), dt=dt)
+            spec_syllable1.y = raw_spec_syllable1
+            spec_syllable1.x = spec_syllable1.x * (rate / (spec_syllable1.N * 2))
+        else:
+            spec_syllable1 = Analysis.spectre_fourier(Xn=Analysis.fourier(syllable1))
+            InOut.write_dat("data/", spec_syllable1.y, file_name="spec_syllable1")
+
+        if os.path.exists("data/spec_syllable2.dat"):
+            raw_spec_syllable2 = InOut.read_dat("data/spec_syllable2.dat")
+            spec_syllable2 = Model.poly_harm(N=len(raw_spec_syllable2), dt=dt)
+            spec_syllable2.y = raw_spec_syllable2
+            spec_syllable2.x = spec_syllable2.x * (rate / (spec_syllable2.N * 2))
+        else:
+            spec_syllable2 = Analysis.spectre_fourier(Xn=Analysis.fourier(syllable2))
+            InOut.write_dat("data/", spec_syllable2.y, file_name="spec_syllable2")
+
+        new_N = int(spec_data.N / 2)
+        spec_data.y = spec_data.y[:new_N]
+        spec_data.x = spec_data.x[:new_N]
+        spec_data.N = new_N
+
+        new_N = int(spec_syllable1.N / 2)
+        spec_syllable1.y = spec_syllable1.y[:new_N]
+        spec_syllable1.x = spec_syllable1.x[:new_N]
+        spec_syllable1.N = new_N
+
+        new_N = int(spec_syllable2.N / 2)
+        spec_syllable2.y = spec_syllable2.y[:new_N]
+        spec_syllable2.x = spec_syllable2.x[:new_N]
+        spec_syllable2.N = new_N
+
+        plt.plot(spec_data.x, spec_data.y)
+        plt.xlabel("Амплитудный спектр всего слова")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        plt.plot(spec_syllable1.x, spec_syllable1.y)
+        plt.xlabel("Амплитудный спектр первого слога")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        plt.plot(spec_syllable2.x, spec_syllable2.y)
+        plt.xlabel("Амплитудный спектр второго слога")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        m = 64
+        # выделение ОТ и формант первого слога
+
+        ot = Processing.lpf(m=m, dt=dt, fc=400)
+        f1 = Processing.bpf(m=m, dt=dt, fc1=2200, fc2=2700)
+        f2 = Processing.bpf(m=m, dt=dt, fc1=2700, fc2=3400)
+
+        # Основной тон
+        packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)
+        packed_filter.y = ot
+
+        filtered = Processing.convol(syllable1, packed_filter)
+        plt.plot(filtered.x, filtered.y)
+        plt.xlabel("Основной тон первого слога")
+        plt.show()
+
+        if os.path.exists("data/spec_OT_s1.dat"):
+            raw_spec_filtered = InOut.read_dat("data/spec_OT_s1.dat")
+            spec_filtered = Model.poly_harm(N=len(raw_spec_filtered), dt=dt)
+            spec_filtered.y = raw_spec_filtered
+            spec_filtered.x = spec_filtered.x * (rate / (spec_filtered.N * 2))
+        else:
+            spec_filtered = Analysis.spectre_fourier(Analysis.fourier(filtered))
+            spec_filtered.y = spec_filtered.y.astype(dtype=np.float32)
+            InOut.write_dat("data/", spec_filtered.y, file_name="spec_OT_s1")
+
+        new_N = int(spec_filtered.N / 2)
+        spec_filtered.y = spec_filtered.y[:new_N]
+        spec_filtered.x = spec_filtered.x[:new_N]
+        spec_filtered.N = new_N
+
+        plt.plot(spec_filtered.x, spec_filtered.y)
+        plt.xlabel("Спектр основного тона первого слога")
+        plt.show()
+
+        InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="OT_s1")
+
+        # Первая форманта
+
+        packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)
+        packed_filter.y = f1
+
+        filtered = Processing.convol(syllable1, packed_filter)
+        plt.plot(filtered.x, filtered.y)
+        plt.xlabel("Первая форманта первого слога")
+        plt.show()
+
+        if os.path.exists("data/spec_f1_s1.dat"):
+            raw_spec_filtered = InOut.read_dat("data/spec_f1_s1.dat")
+            spec_filtered = Model.poly_harm(N=len(raw_spec_filtered), dt=dt)
+            spec_filtered.y = raw_spec_filtered
+            spec_filtered.x = spec_filtered.x * (rate / (spec_filtered.N * 2))
+        else:
+            spec_filtered = Analysis.spectre_fourier(Analysis.fourier(filtered))
+            spec_filtered.y = spec_filtered.y.astype(dtype=np.float32)
+            InOut.write_dat("data/", spec_filtered.y, file_name="spec_f1_s1")
+
+        new_N = int(spec_filtered.N / 2)
+        spec_filtered.y = spec_filtered.y[:new_N]
+        spec_filtered.x = spec_filtered.x[:new_N]
+        spec_filtered.N = new_N
+
+        plt.plot(spec_filtered.x, spec_filtered.y)
+        plt.xlabel("Спектр первой форманты первого слога")
+        plt.show()
+
+        InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="f1_s1")
+
+        # Вторая форманта
+
+        packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)
+        packed_filter.y = f2
+
+        filtered = Processing.convol(syllable1, packed_filter)
+        plt.plot(filtered.x, filtered.y)
+        plt.xlabel("Вторая форманта первого слога")
+        plt.show()
+
+        if os.path.exists("data/spec_f2_s1.dat"):
+            raw_spec_filtered = InOut.read_dat("data/spec_f2_s1.dat")
+            spec_filtered = Model.poly_harm(N=len(raw_spec_filtered), dt=dt)
+            spec_filtered.y = raw_spec_filtered
+            spec_filtered.x = spec_filtered.x * (rate / (spec_filtered.N * 2))
+        else:
+            spec_filtered = Analysis.spectre_fourier(Analysis.fourier(filtered))
+            spec_filtered.y = spec_filtered.y.astype(dtype=np.float32)
+            InOut.write_dat("data/", spec_filtered.y, file_name="spec_f2_s1")
+
+        new_N = int(spec_filtered.N / 2)
+        spec_filtered.y = spec_filtered.y[:new_N]
+        spec_filtered.x = spec_filtered.x[:new_N]
+        spec_filtered.N = new_N
+
+        plt.plot(spec_filtered.x, spec_filtered.y)
+        plt.xlabel("Спектр второй форманты первого слога")
+        plt.show()
+
+        InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="f2_s1")
+
+        # выделение ОТ и формант второго слога
+
+        ot = Processing.lpf(m=m, dt=dt, fc=400)
+        f1 = Processing.bpf(m=m, dt=dt, fc1=500, fc2=900)
+        f2 = Processing.bpf(m=m, dt=dt, fc1=1200, fc2=1700)
+        f3 = Processing.bpf(m=m, dt=dt, fc1=2800, fc2=3200)
+        f4 = Processing.bpf(m=m, dt=dt, fc1=3500, fc2=4100)
+
+        # Основной тон
+        packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)
+        packed_filter.y = ot
+
+        filtered = Processing.convol(syllable1, packed_filter)
+        plt.plot(filtered.x, filtered.y)
+        plt.xlabel("Основной тон второго слога")
+        plt.show()
+
+        if os.path.exists("data/spec_OT_s2.dat"):
+            raw_spec_filtered = InOut.read_dat("data/spec_OT_s2.dat")
+            spec_filtered = Model.poly_harm(N=len(raw_spec_filtered), dt=dt)
+            spec_filtered.y = raw_spec_filtered
+            spec_filtered.x = spec_filtered.x * (rate / (spec_filtered.N * 2))
+        else:
+            spec_filtered = Analysis.spectre_fourier(Analysis.fourier(filtered))
+            spec_filtered.y = spec_filtered.y.astype(dtype=np.float32)
+            InOut.write_dat("data/", spec_filtered.y, file_name="spec_OT_s2")
+
+        new_N = int(spec_filtered.N / 2)
+        spec_filtered.y = spec_filtered.y[:new_N]
+        spec_filtered.x = spec_filtered.x[:new_N]
+        spec_filtered.N = new_N
+
+        plt.plot(spec_filtered.x, spec_filtered.y)
+        plt.xlabel("Спектр основного тона второго слога")
+        plt.show()
+
+        InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="OT_s2")
+
+        # Первая форманта
+
+        packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)
+        packed_filter.y = f1
+
+        filtered = Processing.convol(syllable1, packed_filter)
+        plt.plot(filtered.x, filtered.y)
+        plt.xlabel("Первая форманта второго слога")
+        plt.show()
+
+        if os.path.exists("data/spec_f1_s2.dat"):
+            raw_spec_filtered = InOut.read_dat("data/spec_f1_s2.dat")
+            spec_filtered = Model.poly_harm(N=len(raw_spec_filtered), dt=dt)
+            spec_filtered.y = raw_spec_filtered
+            spec_filtered.x = spec_filtered.x * (rate / (spec_filtered.N * 2))
+        else:
+            spec_filtered = Analysis.spectre_fourier(Analysis.fourier(filtered))
+            spec_filtered.y = spec_filtered.y.astype(dtype=np.float32)
+            InOut.write_dat("data/", spec_filtered.y, file_name="spec_f1_s2")
+
+        new_N = int(spec_filtered.N / 2)
+        spec_filtered.y = spec_filtered.y[:new_N]
+        spec_filtered.x = spec_filtered.x[:new_N]
+        spec_filtered.N = new_N
+
+        plt.plot(spec_filtered.x, spec_filtered.y)
+        plt.xlabel("Спектр первой форманты второго слога")
+        plt.show()
+
+        InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="f1_s2")
+
+        # Вторая форманта
+
+        packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)
+        packed_filter.y = f2
+
+        filtered = Processing.convol(syllable1, packed_filter)
+        plt.plot(filtered.x, filtered.y)
+        plt.xlabel("Вторая форманта второго слога")
+        plt.show()
+
+        if os.path.exists("data/spec_f2_s2.dat"):
+            raw_spec_filtered = InOut.read_dat("data/spec_f2_s2.dat")
+            spec_filtered = Model.poly_harm(N=len(raw_spec_filtered), dt=dt)
+            spec_filtered.y = raw_spec_filtered
+            spec_filtered.x = spec_filtered.x * (rate / (spec_filtered.N * 2))
+        else:
+            spec_filtered = Analysis.spectre_fourier(Analysis.fourier(filtered))
+            spec_filtered.y = spec_filtered.y.astype(dtype=np.float32)
+            InOut.write_dat("data/", spec_filtered.y, file_name="spec_f2_s2")
+
+        new_N = int(spec_filtered.N / 2)
+        spec_filtered.y = spec_filtered.y[:new_N]
+        spec_filtered.x = spec_filtered.x[:new_N]
+        spec_filtered.N = new_N
+
+        plt.plot(spec_filtered.x, spec_filtered.y)
+        plt.xlabel("Спектр второй форманты второго слога")
+        plt.show()
+
+        InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="f2_s2")
+
+        # Вторая форманта
+
+        packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)
+        packed_filter.y = f3
+
+        filtered = Processing.convol(syllable1, packed_filter)
+        plt.plot(filtered.x, filtered.y)
+        plt.xlabel("Вторая форманта второго слога")
+        plt.show()
+
+        if os.path.exists("data/spec_f3_s2.dat"):
+            raw_spec_filtered = InOut.read_dat("data/spec_f3_s2.dat")
+            spec_filtered = Model.poly_harm(N=len(raw_spec_filtered), dt=dt)
+            spec_filtered.y = raw_spec_filtered
+            spec_filtered.x = spec_filtered.x * (rate / (spec_filtered.N * 2))
+        else:
+            spec_filtered = Analysis.spectre_fourier(Analysis.fourier(filtered))
+            spec_filtered.y = spec_filtered.y.astype(dtype=np.float32)
+            InOut.write_dat("data/", spec_filtered.y, file_name="spec_f3_s2")
+
+        new_N = int(spec_filtered.N / 2)
+        spec_filtered.y = spec_filtered.y[:new_N]
+        spec_filtered.x = spec_filtered.x[:new_N]
+        spec_filtered.N = new_N
+
+        plt.plot(spec_filtered.x, spec_filtered.y)
+        plt.xlabel("Спектр второй форманты второго слога")
+        plt.show()
+
+        InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="f3_s2")
+
+        # Вторая форманта
+
+        packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)
+        packed_filter.y = f4
+
+        filtered = Processing.convol(syllable1, packed_filter)
+        plt.plot(filtered.x, filtered.y)
+        plt.xlabel("Вторая форманта второго слога")
+        plt.show()
+
+        if os.path.exists("data/spec_f4_s2.dat"):
+            raw_spec_filtered = InOut.read_dat("data/spec_f4_s2.dat")
+            spec_filtered = Model.poly_harm(N=len(raw_spec_filtered), dt=dt)
+            spec_filtered.y = raw_spec_filtered
+            spec_filtered.x = spec_filtered.x * (rate / (spec_filtered.N * 2))
+        else:
+            spec_filtered = Analysis.spectre_fourier(Analysis.fourier(filtered))
+            spec_filtered.y = spec_filtered.y.astype(dtype=np.float32)
+            InOut.write_dat("data/", spec_filtered.y, file_name="spec_f4_s2")
+
+        new_N = int(spec_filtered.N / 2)
+        spec_filtered.y = spec_filtered.y[:new_N]
+        spec_filtered.x = spec_filtered.x[:new_N]
+        spec_filtered.N = new_N
+
+        plt.plot(spec_filtered.x, spec_filtered.y)
+        plt.xlabel("Спектр второй форманты второго слога")
+        plt.show()
+
+        InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="f4_s2")
+
+    else:
         exit(0)
