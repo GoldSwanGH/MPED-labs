@@ -791,6 +791,9 @@ while True:
         plt.xlabel("Основной тон первого слога")
         plt.show()
 
+        print("Нажмите Enter для следующего графика...")
+        input()
+
         if os.path.exists("data/spec_OT_s1.dat"):
             raw_spec_filtered = InOut.read_dat("data/spec_OT_s1.dat")
             spec_filtered = Model.poly_harm(N=len(raw_spec_filtered), dt=dt)
@@ -811,6 +814,8 @@ while True:
         plt.show()
 
         InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="OT_s1")
+        print("Нажмите Enter для следующего графика...")
+        input()
 
         # Первая форманта
 
@@ -821,6 +826,9 @@ while True:
         plt.plot(filtered.x, filtered.y)
         plt.xlabel("Первая форманта первого слога")
         plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
 
         if os.path.exists("data/spec_f1_s1.dat"):
             raw_spec_filtered = InOut.read_dat("data/spec_f1_s1.dat")
@@ -842,6 +850,8 @@ while True:
         plt.show()
 
         InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="f1_s1")
+        print("Нажмите Enter для следующего графика...")
+        input()
 
         # Вторая форманта
 
@@ -852,6 +862,9 @@ while True:
         plt.plot(filtered.x, filtered.y)
         plt.xlabel("Вторая форманта первого слога")
         plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
 
         if os.path.exists("data/spec_f2_s1.dat"):
             raw_spec_filtered = InOut.read_dat("data/spec_f2_s1.dat")
@@ -873,6 +886,8 @@ while True:
         plt.show()
 
         InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="f2_s1")
+        print("Нажмите Enter для следующего графика...")
+        input()
 
         # выделение ОТ и формант второго слога
 
@@ -886,10 +901,13 @@ while True:
         packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)
         packed_filter.y = ot
 
-        filtered = Processing.convol(syllable1, packed_filter)
+        filtered = Processing.convol(syllable2, packed_filter)
         plt.plot(filtered.x, filtered.y)
         plt.xlabel("Основной тон второго слога")
         plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
 
         if os.path.exists("data/spec_OT_s2.dat"):
             raw_spec_filtered = InOut.read_dat("data/spec_OT_s2.dat")
@@ -911,16 +929,21 @@ while True:
         plt.show()
 
         InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="OT_s2")
+        print("Нажмите Enter для следующего графика...")
+        input()
 
         # Первая форманта
 
         packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)
         packed_filter.y = f1
 
-        filtered = Processing.convol(syllable1, packed_filter)
+        filtered = Processing.convol(syllable2, packed_filter)
         plt.plot(filtered.x, filtered.y)
         plt.xlabel("Первая форманта второго слога")
         plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
 
         if os.path.exists("data/spec_f1_s2.dat"):
             raw_spec_filtered = InOut.read_dat("data/spec_f1_s2.dat")
@@ -942,16 +965,21 @@ while True:
         plt.show()
 
         InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="f1_s2")
+        print("Нажмите Enter для следующего графика...")
+        input()
 
         # Вторая форманта
 
         packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)
         packed_filter.y = f2
 
-        filtered = Processing.convol(syllable1, packed_filter)
+        filtered = Processing.convol(syllable2, packed_filter)
         plt.plot(filtered.x, filtered.y)
         plt.xlabel("Вторая форманта второго слога")
         plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
 
         if os.path.exists("data/spec_f2_s2.dat"):
             raw_spec_filtered = InOut.read_dat("data/spec_f2_s2.dat")
@@ -973,16 +1001,21 @@ while True:
         plt.show()
 
         InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="f2_s2")
+        print("Нажмите Enter для следующего графика...")
+        input()
 
-        # Вторая форманта
+        # Третья форманта
 
         packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)
         packed_filter.y = f3
 
-        filtered = Processing.convol(syllable1, packed_filter)
+        filtered = Processing.convol(syllable2, packed_filter)
         plt.plot(filtered.x, filtered.y)
-        plt.xlabel("Вторая форманта второго слога")
+        plt.xlabel("Третья форманта второго слога")
         plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
 
         if os.path.exists("data/spec_f3_s2.dat"):
             raw_spec_filtered = InOut.read_dat("data/spec_f3_s2.dat")
@@ -1000,20 +1033,28 @@ while True:
         spec_filtered.N = new_N
 
         plt.plot(spec_filtered.x, spec_filtered.y)
-        plt.xlabel("Спектр второй форманты второго слога")
+        plt.xlabel("Спектр третьей форманты второго слога")
         plt.show()
 
         InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="f3_s2")
+        print("Нажмите Enter для следующего графика...")
+        input()
 
-        # Вторая форманта
+        # Четвертая форманта
 
         packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)
         packed_filter.y = f4
 
-        filtered = Processing.convol(syllable1, packed_filter)
+        filtered = Processing.convol(syllable2, packed_filter)
         plt.plot(filtered.x, filtered.y)
-        plt.xlabel("Вторая форманта второго слога")
+        plt.xlabel("Четвертая форманта второго слога")
         plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
 
         if os.path.exists("data/spec_f4_s2.dat"):
             raw_spec_filtered = InOut.read_dat("data/spec_f4_s2.dat")
@@ -1031,7 +1072,7 @@ while True:
         spec_filtered.N = new_N
 
         plt.plot(spec_filtered.x, spec_filtered.y)
-        plt.xlabel("Спектр второй форманты второго слога")
+        plt.xlabel("Спектр четвертой форманты второго слога")
         plt.show()
 
         InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="f4_s2")
