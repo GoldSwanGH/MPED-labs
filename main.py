@@ -13,7 +13,7 @@ from classes.processing import Processing
 
 while True:
     plt.rcParams["figure.figsize"] = (9.6, 7.2)  # 4:3 формат графиков по умолчанию (оставил), увеличил разрешение в 1.5 раза
-    print("Введите номер задания (от 1 до 15) или 0 для выхода: ")
+    print("Введите номер задания (от 1 до 15), 16 для курсовой работы или 0 для выхода: ")
     i = int(input())
 
     if i == 1:
@@ -1076,6 +1076,101 @@ while True:
         plt.show()
 
         InOut.write_wav(path_to_file="data/", rate=rate, data=filtered.y, file_name="f4_s2")
+
+    elif i == 16:
+        # Шум окружения
+        N = 10000
+        R = 1
+        random_noise = Model.noise(N=N, R=R)
+        outer_noise = Model.impulse_noise(data=random_noise, R=100) # надо бы проверить различные R для impulse noise
+        # outer_noise - это шум окружающей (внешней) среды без шума поезда
+
+        plt.plot(outer_noise.x, outer_noise.y)
+        plt.xlabel("Шум окружающей среды")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        # Шум поезда
+        R = 2
+        f_gr = 5000  # граничная частота
+        f_disc = f_gr * 2  # 10000, частота дискретизации
+        dt = 1 / f_disc  # 0.0001, шаг времени
+        # так как у нас N=10000 и dt=0.0001, это значит, что длительность записи 1 секунда
+        # данные были считаны 10000 раз с промежутком в 0.0001 секунды
+        random_noise_data = Model.noise(N=N, R=R)
+        random_noise = Model.harm(N=N, dt=dt)
+        random_noise.y = random_noise_data.y
+
+        m = 16  # настройки фильтра
+        fc1 = 800  # настройки фильтра - начальная частота
+        fc2 = 900  # настройки фильтра - конечная частота
+        bpf = Processing.bpf(fc1=fc1, fc2=fc2, m=m, dt=dt)  # высчитываем данные фильтра
+        packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)  # "упаковываем" данные фильтра
+        packed_filter.y = bpf  # "упаковываем" данные фильтра
+
+        train_noise = filtered = Processing.convol(random_noise, packed_filter)  # фильтруем случайный шум
+
+        train_noise.N = N
+        train_noise.x = train_noise.x[:N]  # обрезаем лишние данные
+        train_noise.y = train_noise.y[:N]  # обрезаем лишние данные
+
+        # spec_section = Analysis.spectre_fourier(Analysis.fourier(train_noise))
+        #
+        # plt.plot(spec_section.x, spec_section.y)
+        # plt.xlabel("Частотный спектр отфильтрованного случайного шума ")
+        # plt.show()
+        #
+        # print("Нажмите Enter для следующего графика...")
+        # input()
+
+        a = 0.001  # коэффициенты экспоненты
+        b = 0.2  # коэффициенты экспоненты
+        exp_trend = Model.trend(N=N, a=a, b=b, data_type=DataType.EXPONENTIAL)  # экспоненциальный тренд
+        train_noise = Model.mult_model(train_noise, exp_trend)  # умножаем шум поезда на экспоненциальный тренд
+
+        train_noise.y = train_noise.y * 15  # делаем шум поезда погромче
+
+        plt.plot(train_noise.x, train_noise.y)
+        plt.xlabel("Шум поезда")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        # складываем шум окружающей среды с шумом поезда
+        model = Model.add_model(train_noise, outer_noise)
+        model.y = model.y * 2  # делаем все вместе погромче
+
+        plt.plot(model.x, model.y)
+        plt.xlabel("Шум поезда + шум окружающей среды")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        # Записываем в файл
+        InOut.write_wav("data/", data=model.y, rate=f_disc, file_name="train")
+
+        # вычисляем спектры отрезков по 1000 каждый
+        M = int(N / 10)  # 1000
+        for i in range(10):
+            section_data = copy.deepcopy(model)
+            section_data.N = M
+            start = i * M
+            end = start + 1000
+            section_data.x = section_data.x[0:M]
+            section_data.y = section_data.y[start:end]
+
+            spec_section = Analysis.spectre_fourier(Analysis.fourier(section_data))
+
+            plt.plot(spec_section.x, spec_section.y)
+            plt.xlabel("Частотный спектр отрезка " + str(i + 1))
+            plt.show()
+
+            print("Нажмите Enter для следующего графика...")
+            input()
 
     else:
         exit(0)
