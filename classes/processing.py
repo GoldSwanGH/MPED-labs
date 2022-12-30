@@ -71,7 +71,7 @@ class Processing:
         exp_trend.N = data.N - W
         exp_trend.x = exp_trend.x[:-W]
         exp_trend.y = exp_trend.y[:-W]
-        print("Выделенный экспоненциальный тренд")
+        print("Выделенный нелинейный тренд")
         plt.plot(exp_trend.x, exp_trend.y)
         plt.show()
         print("Нажмите Enter для следующего графика...")

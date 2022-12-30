@@ -133,12 +133,12 @@ class Analysis:
 
         Rxy = []
         meanX = dataX.y.mean()
-        meanY = dataX.y.mean()
+        meanY = dataY.y.mean()
 
         for L in dataX.x:
             value = 0
-            for k in range(dataX.N - L - 1):
-                value += (dataX.y[k] - meanX) * (dataY.y[k + L] - meanY)
+            for k in range(dataX.N - int(L) - 1):
+                value += (dataX.y[k] - meanX) * (dataY.y[k + int(L)] - meanY)
             Rxy.append(value)
 
         Rxy = np.array(Rxy)

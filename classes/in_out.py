@@ -16,7 +16,8 @@ class InOut:
             content = file.read()
             for i in range(0, len(content), 4):
                 fl = struct.unpack('f', content[i:i+4])
-                floats.append(fl)
+                for val in fl:
+                    floats.append(val)
         floats = np.array(object=floats, dtype=numpy.float32)
         return floats
 

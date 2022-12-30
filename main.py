@@ -13,7 +13,7 @@ from classes.processing import Processing
 
 while True:
     plt.rcParams["figure.figsize"] = (9.6, 7.2)  # 4:3 формат графиков по умолчанию (оставил), увеличил разрешение в 1.5 раза
-    print("Введите номер задания (от 1 до 15), 16 для курсовой работы или 0 для выхода: ")
+    print("Введите номер задания (от 1 до 15), 18 для зачета или 0 для выхода: ")
     i = int(input())
 
     if i == 1:
@@ -156,7 +156,7 @@ while True:
         default_noise_2 = Model.noise(N=1000, R=10)
         my_noise_1 = Model.my_noise(N=1000, R=10)
         my_noise_2 = Model.my_noise(N=1000, R=10)
-        harm_2 = Model.harm(N=1000, A0=100, f0=33)
+        harm_2 = Model.harm(N=1000, A0=50, f0=33)
 
         print("График взаимнокорреляционной (кросскорреляционной, кросс-ковариационной) функции для dataX и dataY"
               " случайного шума, реализованного стандартными библиотеками псевдослучайных чисел")
@@ -1171,6 +1171,280 @@ while True:
 
             print("Нажмите Enter для следующего графика...")
             input()
+
+    elif i == 17:
+        data = InOut.read_dat("data/v1x2.dat")
+        plt.plot(np.arange(len(data)), data)
+        plt.show()
+
+        print("Прочитанные данные из файла")
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        packed_data = Model.trend(N=len(data), a=1, b=1, data_type=DataType.LINEAR)
+        packed_data.y = data
+        non_trend_data = Processing.anti_trend_non_linear(packed_data)
+
+        plt.plot(non_trend_data.x, non_trend_data.y)
+        plt.show()
+
+        print("Данные без тренда")
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        packed_data = Model.harm(N=len(non_trend_data.y), dt=0.001)
+        packed_data.y = non_trend_data.y
+        spec = Analysis.spectre_fourier(Xn=Analysis.fourier(packed_data))
+
+        plt.plot(spec.x, spec.y)
+        plt.show()
+
+        print("Спектр промежуточных данных (для определения настроек фильтра)")
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        bsf = Processing.bsf(m=64, fc1=60, fc2=80, dt=0.001)
+        packed_filter = Model.poly_harm(N=(64 * 2 + 1), dt=0.001)
+        packed_filter.y = bsf
+
+        non_trend_non_harm_data = filtered = Processing.convol(packed_data, packed_filter)
+        non_trend_non_harm_data.x = non_trend_non_harm_data.x[100:1000]
+        non_trend_non_harm_data.y = non_trend_non_harm_data.y[100:1000]
+        non_trend_non_harm_data.N = 900
+
+        plt.plot(non_trend_non_harm_data.x, non_trend_non_harm_data.y)
+        plt.show()
+
+        print("Выделенные случайные данные")
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        spec = Analysis.spectre_fourier(Xn=Analysis.fourier(non_trend_non_harm_data))
+
+        plt.plot(spec.x, spec.y)
+        plt.show()
+
+        print("Спектр случайных данных")
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        Analysis.hist(non_trend_non_harm_data, 100)
+        plt.show()
+        print("Гистограмма случайных данных")
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        plt.plot(packed_filter.x, packed_filter.y)
+        plt.show()
+        print("Фильтр bsf")
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        spec = Analysis.spectre_fourier(Xn=Analysis.fourier(packed_filter))
+
+        plt.plot(spec.x, spec.y)
+        plt.show()
+        print("Спектр фильтра bsf")
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+    elif i == 18:
+        data = InOut.read_dat("data/v1x11.dat")
+
+        packed_data_xy = Model.harm(N=len(data), dt=0.001)
+        packed_data_xy.y = data
+
+        plt.plot(packed_data_xy.x, packed_data_xy.y)
+        plt.xlabel("Прочитанные данные из файла v1x11.dat")
+        plt.show()
+
+        print("Прочитанные данные из файла v1x11.dat")
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        data = InOut.read_dat("data/v1y11.dat")
+
+        packed_data_yx = Model.harm(N=len(data), dt=0.001)
+        packed_data_yx.y = data
+
+        plt.plot(packed_data_yx.x, packed_data_yx.y)
+        plt.xlabel("Прочитанные данные из файла v1y11.dat")
+        plt.show()
+
+        print("Прочитанные данные из файла v1y11.dat")
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        plt.subplot(211)
+        plt.plot(packed_data_xy.x, packed_data_xy.y)
+        plt.xlabel("Прочитанные данные из файла v1x11.dat")
+        plt.subplot(212)
+        plt.plot(packed_data_yx.x, packed_data_yx.y)
+        plt.xlabel("Прочитанные данные из файла v1y11.dat")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        ccf = Analysis.ccf(packed_data_xy, packed_data_yx)
+
+        plt.plot(packed_data_yx.x, ccf)
+        plt.xlabel("Взаимнокорреляционная функция")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        spec_xy = Analysis.spectre_fourier(Xn=Analysis.fourier(packed_data_xy))
+
+        plt.plot(spec_xy.x, spec_xy.y)
+        plt.xlabel("Амплитудный спектр Фурье для v1x11.dat")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        spec_yx = Analysis.spectre_fourier(Xn=Analysis.fourier(packed_data_yx))
+
+        plt.plot(spec_yx.x, spec_yx.y)
+        plt.xlabel("Амплитудный спектр Фурье для v1y11.dat")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        plt.subplot(211)
+        plt.plot(spec_xy.x[30:len(spec_xy.x)], spec_xy.y[30:len(spec_xy.x)])
+        plt.xlabel("Амплитудный спектр Фурье для v1x11.dat")
+        plt.subplot(212)
+        plt.plot(spec_yx.x[30:len(spec_xy.x)], spec_yx.y[30:len(spec_xy.x)])
+        plt.xlabel("Амплитудный спектр Фурье для v1y11.dat")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        ccf_spec = Analysis.ccf(spec_xy, spec_yx)
+
+        plt.plot(spec_xy.x, ccf_spec)
+        plt.xlabel("Взаимнокорреляционная функция между спектрами Фурье")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        plt.rcParams["figure.figsize"] = (9.6, 9.6)
+
+        plt.subplot(311)
+        plt.plot(spec_xy.x[30:len(spec_xy.x)], ccf_spec[30:len(spec_xy.x)])
+        plt.xlabel("Взаимнокорреляционная функция между спектрами Фурье")
+        plt.subplot(312)
+        plt.plot(spec_xy.x[30:len(spec_xy.x)], spec_xy.y[30:len(spec_xy.x)])
+        plt.xlabel("Амплитудный спектр Фурье для v1x11.dat")
+        plt.subplot(313)
+        plt.plot(spec_yx.x[30:len(spec_xy.x)], spec_yx.y[30:len(spec_xy.x)])
+        plt.xlabel("Амплитудный спектр Фурье для v1y11.dat")
+        plt.subplots_adjust(hspace=0.3)
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        packed_ccf = Model.harm(N=len(data), dt=0.001)
+        packed_ccf.y = ccf
+
+        spec_ccf = Analysis.spectre_fourier(Xn=Analysis.fourier(packed_ccf))
+
+        plt.plot(spec_ccf.x, spec_ccf.y)
+        plt.xlabel("Cпектр взаимнокорреляционной функции между данными")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        plt.subplot(311)
+        plt.plot(spec_ccf.x[30:len(spec_ccf.x)], spec_ccf.y[30:len(spec_xy.x)])
+        plt.xlabel("Cпектр взаимнокорреляционной функции между данными")
+        plt.subplot(312)
+        plt.plot(spec_xy.x[30:len(spec_xy.x)], spec_xy.y[30:len(spec_xy.x)])
+        plt.xlabel("Амплитудный спектр Фурье для v1x11.dat")
+        plt.subplot(313)
+        plt.plot(spec_yx.x[30:len(spec_xy.x)], spec_yx.y[30:len(spec_xy.x)])
+        plt.xlabel("Амплитудный спектр Фурье для v1y11.dat")
+        plt.subplots_adjust(hspace=0.3)
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        plt.rcParams["figure.figsize"] = (9.6, 7.2)
+
+        anti_tr_xy = Processing.anti_trend_non_linear(packed_data_xy)
+
+        plt.plot(anti_tr_xy.x, anti_tr_xy.y)
+        plt.xlabel("Данные v1x11.dat без тренда")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        # plt.plot(anti_tr_yx.x, anti_tr_yx.y)
+        # plt.xlabel("Данные yx без тренда")
+        # plt.show()
+
+        # print("Нажмите Enter для следующего графика...")
+        # input()
+
+        ccf_2 = Analysis.ccf(anti_tr_xy, packed_data_yx)
+
+        plt.plot(anti_tr_xy.x, ccf_2)
+        plt.xlabel("Взаимнокорреляционная функция между данными без трендов")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        spec_xy = Analysis.spectre_fourier(Xn=Analysis.fourier(anti_tr_xy))
+
+        plt.plot(spec_xy.x, spec_xy.y)
+        plt.xlabel("Амплитудный спектр Фурье для данных v1x11.dat без тренда")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        # spec_yx = Analysis.spectre_fourier(Xn=Analysis.fourier(anti_tr_yx))
+
+        # plt.plot(spec_yx.x, spec_yx.y)
+        # plt.xlabel("Амплитудный спектр Фурье для данных v3yx3.dat без тренда")
+        # plt.show()
+
+        # print("Нажмите Enter для следующего графика...")
+        # input()
+
+        anti_tr_xy.y = ccf_2
+
+        spec_ccf = Analysis.spectre_fourier(Xn=Analysis.fourier(anti_tr_xy))
+
+        plt.plot(spec_ccf.x, spec_ccf.y)
+        plt.xlabel("Амплитудный спектр Фурье для взаимнокорреляционной функции данных без трендов")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        plt.rcParams["figure.figsize"] = (9.6, 9.6)
+        plt.subplot(311)
+        plt.plot(spec_ccf.x, spec_ccf.y)
+        plt.xlabel("Амплитудный спектр Фурье для взаимнокорреляционной функции данных без трендов")
+        plt.subplot(312)
+        plt.plot(spec_xy.x, spec_xy.y)
+        plt.xlabel("Амплитудный спектр Фурье для данных v1x11.dat без тренда")
+        plt.subplot(313)
+        plt.plot(spec_yx.x, spec_yx.y)
+        plt.xlabel("Амплитудный спектр Фурье для данных v1y11.dat")
+        plt.subplots_adjust(hspace=0.3)
+        plt.show()
 
     else:
         exit(0)
