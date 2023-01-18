@@ -1079,10 +1079,151 @@ while True:
 
     elif i == 16:
         # Шум окружения
-        N = 10000
+        N = 20000
         R = 1
         random_noise = Model.noise(N=N, R=R)
         outer_noise = Model.impulse_noise(data=random_noise, R=100) # надо бы проверить различные R для impulse noise
+        # outer_noise - это шум окружающей (внешней) среды без шума поезда
+
+        plt.plot(outer_noise.x, outer_noise.y)
+        plt.xlabel("Шум окружающей среды")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        # Шум поезда
+        R = 2
+        f_gr = 5000  # граничная частота
+        f_disc = f_gr * 2  # 10000, частота дискретизации
+        dt = 1 / f_disc  # 0.0001, шаг времени
+        # так как у нас N=20000 и dt=0.0001, это значит, что длительность записи 2 секунды
+        # данные были считаны 20000 раз с промежутком в 0.0001 секунды
+        random_noise_data = Model.noise(N=N, R=R)
+        random_noise = Model.harm(N=N, dt=dt)
+        random_noise.y = random_noise_data.y
+
+        m = 64  # настройки фильтра
+        fc1 = 750  # настройки фильтра - начальная частота
+        fc2 = 1200  # настройки фильтра - конечная частота
+        bpf = Processing.bpf(fc1=fc1, fc2=fc2, m=m, dt=dt)  # высчитываем данные фильтра
+        packed_filter_1 = Model.poly_harm(N=(m * 2 + 1), dt=dt)  # "упаковываем" данные фильтра
+        packed_filter_1.y = bpf  # "упаковываем" данные фильтра
+
+        m = 64  # настройки фильтра
+        fc1 = 2800  # настройки фильтра - начальная частота
+        fc2 = 3100  # настройки фильтра - конечная частота
+        bpf = Processing.bpf(fc1=fc1, fc2=fc2, m=m, dt=dt)  # высчитываем данные фильтра
+        packed_filter_2 = Model.poly_harm(N=(m * 2 + 1), dt=dt)  # "упаковываем" данные фильтра
+        packed_filter_2.y = bpf  # "упаковываем" данные фильтра
+
+        m = 64  # настройки фильтра
+        fc1 = 450  # настройки фильтра - начальная частота
+        fc2 = 550  # настройки фильтра - конечная частота
+        bpf = Processing.bpf(fc1=fc1, fc2=fc2, m=m, dt=dt)  # высчитываем данные фильтра
+        packed_filter_3 = Model.poly_harm(N=(m * 2 + 1), dt=dt)  # "упаковываем" данные фильтра
+        packed_filter_3.y = bpf  # "упаковываем" данные фильтра
+
+        packed_filter = Model.add_model(packed_filter_1, packed_filter_2)
+        packed_filter = Model.add_model(packed_filter, packed_filter_3)
+
+        plt.plot(random_noise.x, random_noise.y)
+        plt.xlabel("Случайный шум поезда")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        plt.plot(packed_filter.x, packed_filter.y)
+        plt.xlabel("Фильтр")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        spec_filter = Analysis.spectre_fourier(Analysis.fourier(packed_filter))
+
+        plt.plot(spec_filter.x, spec_filter.y)
+        plt.xlabel("Спектр Фурье фильтра")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        train_noise = filtered = Processing.convol(random_noise, packed_filter)  # фильтруем случайный шум
+
+        train_noise.N = N
+        train_noise.x = train_noise.x[:N]  # обрезаем лишние данные
+        train_noise.y = train_noise.y[:N]  # обрезаем лишние данные
+
+        a = 0.00057  # коэффициенты экспоненты
+        b = 0.1  # коэффициенты экспоненты
+        exp_trend = Model.trend(N=N, a=a, b=b, data_type=DataType.EXPONENTIAL)  # экспоненциальный тренд
+        train_noise = Model.mult_model(train_noise, exp_trend)  # умножаем шум поезда на экспоненциальный тренд
+
+        train_noise.y = train_noise.y * 2.5  # делаем шум поезда погромче
+
+        plt.plot(exp_trend.x, exp_trend.y)
+        plt.xlabel("Экспоненциальный тренд")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        plt.plot(train_noise.x, train_noise.y)
+        plt.xlabel("Шум поезда")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        # складываем шум окружающей среды с шумом поезда
+        model = Model.add_model(train_noise, outer_noise)
+        model.y = model.y * 2  # делаем все вместе погромче
+
+        plt.plot(model.x, model.y)
+        plt.xlabel("Шум поезда + шум окружающей среды, часть 1")
+        plt.show()
+
+        # нужно сделать отрезок с шумом поезда+окружения без экспоненциального тренда
+        # взять максимальное значение от экспоненциального тренда и умножить шум поезда на него
+        # ну и громкость увеличить в 8 или 16 сколько там щас раз
+        # после этого нужно отзеркалить первый отрезок
+        # и сложить все три отрезка вместе по порядку
+        # 2 секунды + ну пусть 4 секунды + 2 секунды = 8 секунд, звучит n0rm =)
+        # реализовать динамический диапазон датчика - по финальной записи пробежаться с каким-нибудь значением
+        # границы D - и если значение по y больше, чем D, то делаем его равным D
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        # вычисляем спектры отрезков по 2000 каждый
+
+        M = int(N / 10)  # 1000
+        for i in range(10):
+            section_data = copy.deepcopy(model)
+            section_data.N = M
+            start = i * M
+            end = start + 2000
+            section_data.x = section_data.x[0:M]
+            section_data.y = section_data.y[start:end]
+
+            spec_section = Analysis.spectre_fourier(Analysis.fourier(section_data))
+
+            plt.plot(spec_section.x, spec_section.y)
+            plt.xlabel("Частотный спектр отрезка " + str(i + 1))
+            plt.show()
+
+            print("Нажмите Enter для следующего графика...")
+            input()
+
+        # 4 секунды отрезок
+
+        # Шум окружения
+        N = 40000
+        R = 1
+        random_noise = Model.noise(N=N, R=R)
+        outer_noise = Model.impulse_noise(data=random_noise, R=120)  # надо бы проверить различные R для impulse noise
         # outer_noise - это шум окружающей (внешней) среды без шума поезда
 
         plt.plot(outer_noise.x, outer_noise.y)
@@ -1103,34 +1244,13 @@ while True:
         random_noise = Model.harm(N=N, dt=dt)
         random_noise.y = random_noise_data.y
 
-        m = 16  # настройки фильтра
-        fc1 = 800  # настройки фильтра - начальная частота
-        fc2 = 900  # настройки фильтра - конечная частота
-        bpf = Processing.bpf(fc1=fc1, fc2=fc2, m=m, dt=dt)  # высчитываем данные фильтра
-        packed_filter = Model.poly_harm(N=(m * 2 + 1), dt=dt)  # "упаковываем" данные фильтра
-        packed_filter.y = bpf  # "упаковываем" данные фильтра
-
         train_noise = filtered = Processing.convol(random_noise, packed_filter)  # фильтруем случайный шум
 
         train_noise.N = N
         train_noise.x = train_noise.x[:N]  # обрезаем лишние данные
         train_noise.y = train_noise.y[:N]  # обрезаем лишние данные
 
-        # spec_section = Analysis.spectre_fourier(Analysis.fourier(train_noise))
-        #
-        # plt.plot(spec_section.x, spec_section.y)
-        # plt.xlabel("Частотный спектр отфильтрованного случайного шума ")
-        # plt.show()
-        #
-        # print("Нажмите Enter для следующего графика...")
-        # input()
-
-        a = 0.001  # коэффициенты экспоненты
-        b = 0.2  # коэффициенты экспоненты
-        exp_trend = Model.trend(N=N, a=a, b=b, data_type=DataType.EXPONENTIAL)  # экспоненциальный тренд
-        train_noise = Model.mult_model(train_noise, exp_trend)  # умножаем шум поезда на экспоненциальный тренд
-
-        train_noise.y = train_noise.y * 15  # делаем шум поезда погромче
+        train_noise.y = train_noise.y * exp_trend.y[19999] * 2.5  # делаем шум поезда погромче
 
         plt.plot(train_noise.x, train_noise.y)
         plt.xlabel("Шум поезда")
@@ -1140,37 +1260,66 @@ while True:
         input()
 
         # складываем шум окружающей среды с шумом поезда
-        model = Model.add_model(train_noise, outer_noise)
-        model.y = model.y * 2  # делаем все вместе погромче
+        model_1 = Model.add_model(train_noise, outer_noise)
+        model_1.y = model_1.y * 2  # делаем все вместе погромче
 
-        plt.plot(model.x, model.y)
-        plt.xlabel("Шум поезда + шум окружающей среды")
+        plt.plot(model_1.x, model_1.y)
+        plt.xlabel("Шум поезда + шум окружающей среды, часть 2")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        model_2 = Model.noise(N=20000, R=1)
+
+        for i in range(20000):
+            model_2.y[i] = model.y[19999 - i]
+
+        plt.plot(model_2.x, model_2.y)
+        plt.xlabel("Шум поезда + шум окружающей среды, часть 3")
+        plt.show()
+
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        resulting_model = Model.noise(N=80000, R=R)
+
+        for i in range(20000):
+            resulting_model.y[i] = model.y[i]
+
+        for i in range(40000):
+            resulting_model.y[20000 + i] = model_1.y[i]
+
+        for i in range(20000):
+            resulting_model.y[60000 + i] = model_2.y[i]
+
+        plt.plot(resulting_model.x, resulting_model.y)
+        plt.xlabel("Шум поезда + шум окружающей среды, полная запись")
         plt.show()
 
         print("Нажмите Enter для следующего графика...")
         input()
 
         # Записываем в файл
-        InOut.write_wav("data/", data=model.y, rate=f_disc, file_name="train")
+        InOut.write_wav("data/", data=resulting_model.y, rate=f_disc, file_name="train")
 
-        # вычисляем спектры отрезков по 1000 каждый
-        M = int(N / 10)  # 1000
-        for i in range(10):
-            section_data = copy.deepcopy(model)
-            section_data.N = M
-            start = i * M
-            end = start + 1000
-            section_data.x = section_data.x[0:M]
-            section_data.y = section_data.y[start:end]
+        diapazon = 24000
 
-            spec_section = Analysis.spectre_fourier(Analysis.fourier(section_data))
+        for i in range(len(resulting_model.x)):
+            if resulting_model.y[i] > diapazon:
+                resulting_model.y[i] = diapazon
+            elif resulting_model.y[i] < (-diapazon):
+                resulting_model.y[i] = (-diapazon)
 
-            plt.plot(spec_section.x, spec_section.y)
-            plt.xlabel("Частотный спектр отрезка " + str(i + 1))
-            plt.show()
+        plt.plot(resulting_model.x, resulting_model.y)
+        plt.xlabel("Шум поезда + шум окружающей среды, полная запись")
+        plt.show()
 
-            print("Нажмите Enter для следующего графика...")
-            input()
+        print("Нажмите Enter для следующего графика...")
+        input()
+
+        # Записываем в файл
+        InOut.write_wav("data/", data=resulting_model.y, rate=f_disc, file_name="train_with_diapazon")
 
     elif i == 17:
         data = InOut.read_dat("data/v1x2.dat")
